@@ -1,54 +1,27 @@
 name: Provjera zaliha
 
+# Rezervni okidac: provjera se izvrsava na Vercelu (/api/cron), GitHub je samo pokrene.
+# Glavni okidac je vanjski cron servis (vidi Admin tab na stranici).
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
-    inputs:
-      diag:
-        description: "Dijagnostika Apple zahtjeva"
-        type: boolean
-        default: false
-
-concurrency:
-  group: stock-check
-  cancel-in-progress: false
 
 permissions:
   contents: read
   id-token: write # potpisani token kojim se GitHub prijavljuje na Vercel stranicu
 
 jobs:
-  check:
+  trigger:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Ucitaj prethodno stanje
-        uses: actions/cache/restore@v4
-        with:
-          path: state
-          key: stock-state-${{ github.run_id }}
-          restore-keys: stock-state-
-
-      - name: Dijagnostika
-        if: ${{ inputs.diag }}
-        run: node scripts/probe.mjs https://iphone-stock-checker-hazel.vercel.app
-
-      - name: Provjeri zalihe
-        if: ${{ !inputs.diag }}
-        run: mkdir -p state && node scripts/notify.mjs
+      - name: Pokreni provjeru na Vercelu
+        run: |
+          TOKEN=$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=iphone-stock-checker" | jq -r .value)
+          RES=$(curl -sS -m 90 -w '\n%{http_code}' -H "Authorization: Bearer $TOKEN" "${APP_URL:-https://iphone-stock-checker-hazel.vercel.app}/api/cron")
+          CODE=$(echo "$RES" | tail -n1); BODY=$(echo "$RES" | sed '$d')
+          echo "::notice::HTTP $CODE $(echo "$BODY" | head -c 900)"
+          [ "$CODE" = "200" ]
         env:
           APP_URL: ${{ vars.APP_URL }}
-
-      - name: Sacuvaj stanje
-        if: ${{ !inputs.diag && always() }}
-        uses: actions/cache/save@v4
-        with:
-          path: state
-          key: stock-state-${{ github.run_id }}

@@ -1,5 +1,6 @@
 // Vlasnik: statistika posjeta i korisnici. Takodje: prvo postavljanje PIN-a, Google Client ID, preuzimanje vlasnistva.
-import { stats, allUsers, claimOwner, setGoogleClientId, setPin, checkPin, pinConfigured, ownerSub } from "../lib/db.js";
+import { stats, allUsers, claimOwner, setGoogleClientId, setPin, checkPin, pinConfigured, ownerSub, cronKey } from "../lib/db.js";
+import { lastRun, runJob } from "../lib/job.js";
 import { currentUser, readBody, sendError } from "../lib/session.js";
 
 export default async function handler(req, res) {
@@ -9,9 +10,12 @@ export default async function handler(req, res) {
 
     if (req.method === "GET") {
       if (!me?.isOwner) return res.status(403).json({ error: "Owner only.", code: "owner_only" });
-      const [s, users] = await Promise.all([stats(30), allUsers()]);
+      const [s, users, key, last] = await Promise.all([stats(30), allUsers(), cronKey(), lastRun()]);
+      const host = req.headers["x-forwarded-host"] || req.headers.host || "iphone-stock-checker-hazel.vercel.app";
       return res.status(200).json({
         stats: s,
+        cronUrl: `https://${host}/api/cron?key=${key}`,
+        lastRun: last,
         users: users
           .map((u) => ({
             email: u.profile.email || "",
@@ -43,6 +47,12 @@ export default async function handler(req, res) {
       if (!allowed) return res.status(403).json({ error: "Wrong PIN.", code: "pin_wrong" });
       await setGoogleClientId(body.clientId);
       return res.status(200).json({ ok: true });
+    }
+
+    // Rucno pokreni provjeru odmah (samo vlasnik)
+    if (body.action === "runNow") {
+      if (!me?.isOwner) return res.status(403).json({ error: "Owner only.", code: "owner_only" });
+      return res.status(200).json({ ok: true, result: await runJob({ force: true, source: "admin" }) });
     }
 
     // Postani vlasnik (prijavljen + PIN)

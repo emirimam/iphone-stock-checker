@@ -15,7 +15,7 @@ Prati dostupnost iPhonea za preuzimanje (pickup) u Apple Storeovima blizu US ZIP
 |---|---|
 | Stranica + API (`/api/auth`, `settings`, `check`, `admin`, `track`, `jobs`) | Vercel |
 | Podaci (korisnici, podešavanja, statistika, rezultati po ZIP-u) | Upstash Redis (Vercel Storage) |
-| Provjera svakih 15 min + obavijesti | GitHub Actions (`.github/workflows/check.yml`) |
+| Provjera svakih 15 min + obavijesti | `/api/cron` na Vercelu; okidač: cron-job.org (glavni) + GitHub Actions (rezerva) |
 
 GitHub Actions se na `/api/jobs` prijavljuje GitHubovim potpisanim OIDC tokenom (bez secreta). Apple se pita jednom po ZIP-u,
 a svaki korisnik dobija obavijest po svojim filterima. Sesije su HttpOnly kolačići potpisani tajnim ključem iz baze.

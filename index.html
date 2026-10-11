@@ -265,6 +265,14 @@
   <section class="tab" id="tab-admin" hidden>
     <div class="kpis" id="kpis"></div>
     <div class="card">
+      <h3 data-i18n="cronTitle"></h3>
+      <div id="cronStatus" class="meta" style="margin:6px 0 10px"></div>
+      <div class="actions" style="margin-top:0"><button id="runNow" data-i18n="runNow"></button><span class="msg" id="runMsg"></span></div>
+      <p class="hint" data-i18n-html="cronHelp" style="margin-top:14px"></p>
+      <div class="row" style="margin-top:8px"><label class="f">Cron URL<input id="cronUrl" readonly spellcheck="false"></label></div>
+      <div class="actions"><button id="copyCron" class="ghost" data-i18n="copy"></button></div>
+    </div>
+    <div class="card">
       <h3 data-i18n="adminDaily"></h3>
       <div class="chart" id="chart"></div>
       <div class="legend"><span class="sw views"></span><span data-i18n="views"></span><span class="sw visitors"></span><span data-i18n="visitors"></span></div>
@@ -330,6 +338,15 @@ const I18N = {
     pinShort: "PIN must be at least 4 characters.", pinMismatch: "PINs don't match.",
     saveClientId: "Save Client ID", clientSaved: "Saved. Reloading…",
     warnStorage: "The page can't see the database. In Vercel open <b>Deployments</b> and click <b>⋯ → Redeploy</b> on the latest one.",
+    cronTitle: "Automatic checks",
+    runNow: "Run check now",
+    running: "Checking…",
+    copy: "Copy URL", copied: "Copied",
+    cronNever: "No automatic check has run yet.",
+    cronLast: (when, src, users, zips, ms) => `Last run ${when} via ${src} · ${users} user(s), ${zips} ZIP(s), ${(ms / 1000).toFixed(1)} s`,
+    cronStale: " — older than 20 minutes, the scheduler isn't firing.",
+    cronSent: (n) => `Alerts sent: ${n}`,
+    cronHelp: "Stock is checked by calling the URL below every 15 minutes. GitHub Actions is a backup but its schedule is unreliable, so set up a free scheduler: go to <a href=\"https://cron-job.org\" target=\"_blank\" rel=\"noopener\">cron-job.org</a>, create a free account, click <b>Create cronjob</b>, paste the URL, choose <b>Every 15 minutes</b> and save. Keep this URL private.",
     adminDaily: "Last 30 days", adminUsers: "Registered users", views: "Page views", visitors: "Unique visitors",
     kTotalViews: "Total page views", kVisitors: "Unique visitors", kToday: "Today (views / visitors)", kUsers: "Registered users",
     uEmail: "User", uZip: "ZIP", uModels: "Watching", uNotif: "Alerts", uLast: "Last seen", uSince: "Joined",
@@ -440,6 +457,15 @@ const I18N = {
     pinShort: "PIN mora imati najmanje 4 znaka.", pinMismatch: "PIN-ovi se ne poklapaju.",
     saveClientId: "Sačuvaj Client ID", clientSaved: "Sačuvano. Učitavam ponovo…",
     warnStorage: "Baza nije vidljiva stranici. U Vercelu otvori <b>Deployments</b> i na zadnjem klikni <b>⋯ → Redeploy</b>.",
+    cronTitle: "Automatske provjere",
+    runNow: "Pokreni provjeru sada",
+    running: "Provjeravam…",
+    copy: "Kopiraj URL", copied: "Kopirano",
+    cronNever: "Još nije bilo nijedne automatske provjere.",
+    cronLast: (when, src, users, zips, ms) => `Zadnja provjera ${when} preko: ${src} · korisnika ${users}, ZIP-ova ${zips}, ${(ms / 1000).toFixed(1)} s`,
+    cronStale: " — starije od 20 minuta, raspored ne radi.",
+    cronSent: (n) => `Poslanih obavijesti: ${n}`,
+    cronHelp: "Zalihe se provjeravaju pozivom adrese ispod svakih 15 minuta. GitHub Actions je rezerva, ali njegov raspored nije pouzdan, pa podesi besplatni planer: otvori <a href=\"https://cron-job.org\" target=\"_blank\" rel=\"noopener\">cron-job.org</a>, napravi besplatan nalog, klikni <b>Create cronjob</b>, zalijepi URL, izaberi <b>Every 15 minutes</b> i sačuvaj. Ovaj URL drži privatnim.",
     adminDaily: "Zadnjih 30 dana", adminUsers: "Registrovani korisnici", views: "Pregledi", visitors: "Jedinstveni posjetioci",
     kTotalViews: "Ukupno pregleda", kVisitors: "Jedinstvenih posjetilaca", kToday: "Danas (pregledi / posjetioci)", kUsers: "Registrovanih korisnika",
     uEmail: "Korisnik", uZip: "ZIP", uModels: "Prati", uNotif: "Obavijesti", uLast: "Zadnje viđen", uSince: "Pridružio se",
@@ -833,10 +859,37 @@ async function loadAdmin() {
         <td>${esc(fmtDate(u.lastSeen))}</td><td>${esc(fmtDate(u.createdAt))}</td></tr>`).join("")}
       </tbody></table></div>` : `<p class="hint">—</p>`;
     $("adminClientId").value = state.auth?.googleClientId || "";
+    $("cronUrl").value = d.cronUrl || "";
+    renderCron(d.lastRun);
   } catch (e) {
     $("kpis").innerHTML = `<div class="banner err">${esc(errText(e))}</div>`;
   }
 }
+
+function renderCron(r) {
+  const t = T();
+  if (!r) { $("cronStatus").textContent = t.cronNever; return; }
+  const stale = Date.now() - Date.parse(r.at) > 20 * 60000;
+  const sent = (r.log || []).reduce((n, x) => n + (x.sent || 0), 0);
+  $("cronStatus").innerHTML = `<span class="stock ${stale ? "" : "ok"}">${esc(t.cronLast(ago(r.at), r.source, r.users, r.zips, r.ms || 0))}${stale ? esc(t.cronStale) : ""}</span>` +
+    `<br>${esc(t.cronSent(sent))}` + (r.errors?.length ? `<br><span class="msg err">${esc(r.errors.join("; "))}</span>` : "");
+}
+
+$("runNow").addEventListener("click", async () => {
+  const m = $("runMsg"); m.className = "msg"; m.textContent = T().running; $("runNow").disabled = true;
+  try {
+    const d = await api("/api/admin", "POST", { action: "runNow" });
+    m.textContent = ""; renderCron(d.result);
+    const st = await api(`/api/settings?zip=${filters().zip}`); if (st.status) { state.status = st.status; render(st.status); }
+  } catch (e) { m.className = "msg err"; m.textContent = errText(e); }
+  finally { $("runNow").disabled = false; }
+});
+
+$("copyCron").addEventListener("click", () => {
+  const b = $("copyCron"), v = $("cronUrl").value;
+  const done = () => { b.textContent = T().copied; setTimeout(() => (b.textContent = T().copy), 1500); };
+  try { navigator.clipboard.writeText(v).then(done, () => { $("cronUrl").select(); }); } catch (e) { $("cronUrl").select(); }
+});
 
 $("saveClientId").addEventListener("click", async () => {
   const m = $("adminMsg"); m.className = "msg";
