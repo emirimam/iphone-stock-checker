@@ -345,9 +345,20 @@ $("login").addEventListener("click", async () => {
   state.pin = $("pin").value;
   $("loginMsg").textContent = "";
   try {
-    const d = await api("POST", { action: "login" });
+    let d;
+    try {
+      d = await api("POST", { action: "login" });
+    } catch (e) {
+      if (!/nije postavljen/i.test(e.message)) throw e;
+      // PIN jos ne postoji: upisani PIN postaje novi PIN
+      if (state.pin.length < 4) throw new Error("PIN mora imati najmanje 4 znaka.");
+      d = await api("POST", { action: "setpin", newPin: state.pin });
+      state.pinConfigured = true;
+      $("saveMsg").className = "msg ok"; $("saveMsg").textContent = "PIN postavljen. Sad izaberi telefon i upiši ntfy topic.";
+    }
     store.set("pin", state.pin);
     state.authorized = true; state.settings = d.settings;
+    $("setup").innerHTML = "";
     fillForm();
   } catch (e) {
     $("loginMsg").className = "msg err"; $("loginMsg").textContent = e.message;

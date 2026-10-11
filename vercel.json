@@ -1,7 +1,12 @@
 {
   "functions": {
-    "api/check.js": {
-      "maxDuration": 60
+    "api/check.js": { "maxDuration": 60 },
+    "api/settings.js": { "maxDuration": 30 }
+  },
+  "headers": [
+    {
+      "source": "/",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
     }
-  }
+  ]
 }
