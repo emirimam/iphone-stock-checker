@@ -9,6 +9,10 @@ on:
         description: "Samo posalji probnu poruku"
         type: boolean
         default: false
+      diag:
+        description: "Dijagnostika Apple zahtjeva"
+        type: boolean
+        default: false
 
 concurrency:
   group: stock-check
@@ -39,8 +43,12 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           APP_URL: ${{ vars.APP_URL }}
 
+      - name: Dijagnostika
+        if: ${{ inputs.diag }}
+        run: node scripts/diag.mjs
+
       - name: Provjeri zalihe
-        if: ${{ !inputs.test }}
+        if: ${{ !inputs.test && !inputs.diag }}
         run: mkdir -p state && node scripts/notify.mjs
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
@@ -50,7 +58,7 @@ jobs:
           MODEL: ${{ vars.MODEL }}
 
       - name: Sacuvaj stanje
-        if: ${{ !inputs.test && always() }}
+        if: ${{ !inputs.test && !inputs.diag && always() }}
         uses: actions/cache/save@v4
         with:
           path: state
