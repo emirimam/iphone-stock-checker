@@ -1,18 +1,6 @@
-const urls = [
-  "https://iphone-stock-checker-hazel.vercel.app",
-  "https://iphone-stock-checker-emirimamovice-5317s-projects.vercel.app",
-  "https://iphone-stock-checker-git-main-emirimamovice-5317s-projects.vercel.app",
-  "https://iphone-stock-checker-emirimam.vercel.app",
-  ...(process.argv.slice(2)),
-];
-for (const u of urls) {
-  for (const path of ["/", "/api/settings"]) {
-    try {
-      const r = await fetch(u + path, { redirect: "manual", signal: AbortSignal.timeout(15000) });
-      const t = (await r.text()).replace(/\s+/g, " ").slice(0, 160);
-      console.log(`::notice::[${r.status}] ${u}${path} loc=${r.headers.get("location") || ""} | ${t}`);
-    } catch (e) {
-      console.log(`::notice::[ERR] ${u}${path} ${e.message}`);
-    }
-  }
-}
+const u = process.argv[2] || "https://iphone-stock-checker-hazel.vercel.app";
+const d = await (await fetch(`${u}/api/settings`)).json();
+const s = d.settings || {};
+console.log(`::notice::storage=${d.storage} pinConfigured=${d.pinConfigured} topicSet=${s.ntfyTopicSet} enabled=${s.enabled} models=${(s.models||[]).join("|")} storages=${(s.storages||[]).join("|")} colors=${(s.colors||[]).join("|")} zip=${s.zip} miles=${s.maxMiles} status=${d.status ? d.status.source + " " + d.status.checkedAt : "none"}`);
+const r = await fetch(`${u}/api/check`); const c = await r.json();
+console.log(`::notice::live check [${r.status}] ${c.error || `stores=${c.stores?.length} wanted=${c.wantedConfigs} other=${c.otherAvailable?.length}`}`);
