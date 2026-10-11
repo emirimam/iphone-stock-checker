@@ -1,5 +1,5 @@
 const urls = [
-  "https://iphone-stock-checker.vercel.app",
+  "https://iphone-stock-checker-hazel.vercel.app",
   "https://iphone-stock-checker-emirimamovice-5317s-projects.vercel.app",
   "https://iphone-stock-checker-git-main-emirimamovice-5317s-projects.vercel.app",
   "https://iphone-stock-checker-emirimam.vercel.app",

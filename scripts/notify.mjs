@@ -8,8 +8,7 @@ import { sanitize, filtersOf } from "../lib/settings.js";
 
 const CANDIDATES = [
   process.env.APP_URL,
-  "https://iphone-stock-checker.vercel.app",
-  "https://iphone-stock-checker-emirimamovice-5317s-projects.vercel.app",
+  "https://iphone-stock-checker-hazel.vercel.app",
 ].filter(Boolean).map((u) => u.replace(/\/+$/, ""));
 const STATE = "state/state.json";
 

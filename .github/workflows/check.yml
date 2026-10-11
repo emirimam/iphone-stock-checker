@@ -50,7 +50,7 @@ jobs:
 
       - name: Dijagnostika
         if: ${{ inputs.diag }}
-        run: node scripts/probe.mjs https://iphone-stock-checker-fugtlsfhi-emirimamovice-5317s-projects.vercel.app
+        run: node scripts/probe.mjs https://iphone-stock-checker-hazel.vercel.app
 
       - name: Provjeri zalihe
         if: ${{ !inputs.test && !inputs.diag }}
