@@ -1,27 +1,31 @@
-# iPhone 18 Pro Max – provjera zaliha (Middleburg, FL 32068)
+# iPhone Stock – Apple Store pickup alerts
 
-Provjerava da li Apple Storeovi u blizini ZIP-a **32068** imaju iPhone 18 Pro Max za preuzimanje (pickup)
-i šalje push poruku na mobitel kad se nešto pojavi.
+Live: https://iphone-stock-checker-hazel.vercel.app
 
-- **Web stranica (Vercel):** traženi i ostali dostupni telefoni + sva podešavanja (model, memorija, boja, ZIP, obavijesti) zaštićena PIN-om.
-- **Automatska provjera (GitHub Actions):** svakih 15 min (`.github/workflows/check.yml`), poruka preko [ntfy](https://ntfy.sh)
-  samo za *nove* pojave. Vercel Hobby plan dozvoljava cron samo jednom dnevno, pa raspored ide preko GitHub Actions.
+Prati dostupnost iPhonea za preuzimanje (pickup) u Apple Storeovima blizu US ZIP koda i šalje push obavijest (ntfy) kad se traženi model pojavi.
 
-## Podešavanje
+- **Više korisnika** – prijava Googleom; svaki korisnik ima svoj telefon, ZIP, udaljenost i obavijesti.
+- **Tabovi:** Stock · Compare · Guide · Settings · Admin (samo vlasnik).
+- **Admin:** brojač posjeta (pregledi, jedinstveni posjetioci, 30 dana), lista korisnika, Google Client ID.
+- **EN/BS** – engleski je zadani jezik.
 
-1. Vercel projekat → *Storage* → poveži **Upstash Redis** (besplatno).
-2. Otvori stranicu → *Podešavanja i obavijesti* → postavi PIN → izaberi telefon i upiši ntfy topic → *Pošalji probnu poruku*.
+## Arhitektura
 
-GitHub Actions se na stranicu prijavljuje GitHubovim potpisanim OIDC tokenom (`id-token: write`),
-pa nikakvi secreti nisu potrebni. Adresu stranice pronalazi sam; po potrebi je postavi kao Actions variable `APP_URL`.
+| Dio | Gdje |
+|---|---|
+| Stranica + API (`/api/auth`, `settings`, `check`, `admin`, `track`, `jobs`) | Vercel |
+| Podaci (korisnici, podešavanja, statistika, rezultati po ZIP-u) | Upstash Redis (Vercel Storage) |
+| Provjera svakih 15 min + obavijesti | GitHub Actions (`.github/workflows/check.yml`) |
 
-## Lokalno
+GitHub Actions se na `/api/jobs` prijavljuje GitHubovim potpisanim OIDC tokenom (bez secreta). Apple se pita jednom po ZIP-u,
+a svaki korisnik dobija obavijest po svojim filterima. Sesije su HttpOnly kolačići potpisani tajnim ključem iz baze.
 
-```
-node scripts/notify.mjs --test   # probna poruka
-node scripts/notify.mjs          # jedna provjera
-```
+## Podešavanje (vlasnik)
 
-Koristi Apple endpoint `/shop/retail/pickup-message` (`/shop/fulfillment-messages` vraća 541 sa servera). Za dijagnostiku pokreni workflow sa „diag“.
+1. Vercel → Storage → **Upstash Redis**.
+2. Google Cloud Console → OAuth client ID (Web), *Authorized JavaScript origins* = adresa stranice.
+3. Na stranici: Client ID + PIN u žutom okviru → prijava Googleom → Settings → **Become owner** (PIN).
 
-Ako Apple promijeni stranicu pa skripta ne nađe part brojeve, postavi varijablu `PARTS` (npr. `MXXXXLL/A,MYYYYLL/A`).
+Detaljno uputstvo je u tabu **Guide**.
+
+Apple endpoint: `/shop/retail/pickup-message` (`/shop/fulfillment-messages` vraća 541 sa servera).

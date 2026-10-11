@@ -1,133 +1,103 @@
 // Pokrece GitHub Actions svakih 15 min:
-// 1) procita podesavanja sa Vercel stranice, 2) provjeri Apple, 3) posalje ntfy za trazene modele,
-// 4) vrati rezultat na stranicu da se prikaze kao "zadnja automatska provjera".
+// 1) od stranice uzme listu korisnika (prijava GitHub OIDC tokenom),
+// 2) provjeri Apple jednom po ZIP-u, 3) svakom korisniku posalje obavijest po njegovim filterima,
+// 4) vrati rezultate stranici (prikaz "zadnja automatska provjera").
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { checkStock } from "../lib/apple.js";
+import { checkStock, isWanted } from "../lib/apple.js";
 import { sendNtfy, t } from "../lib/notify.js";
-import { sanitize, filtersOf } from "../lib/settings.js";
+import { filtersOf } from "../lib/settings.js";
 
-const CANDIDATES = [
-  process.env.APP_URL,
-  "https://iphone-stock-checker-hazel.vercel.app",
-].filter(Boolean).map((u) => u.replace(/\/+$/, ""));
+const APP_URL = (process.env.APP_URL || "https://iphone-stock-checker-hazel.vercel.app").replace(/\/+$/, "");
 const STATE = "state/state.json";
-
 const gh = (level, msg) => console.log(`::${level}::${String(msg).replace(/\r?\n/g, "%0A")}`);
 
-/** GitHub Actions OIDC token - stranica njime provjerava da zahtjev dolazi iz ovog repoa. */
 async function githubToken() {
   const url = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
   const tok = process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
-  if (!url || !tok) return "";
+  if (!url || !tok) throw new Error("GitHub OIDC nije dostupan (treba permissions: id-token: write)");
   const res = await fetch(`${url}&audience=iphone-stock-checker`, { headers: { Authorization: `Bearer ${tok}` } });
-  return (await res.json()).value || "";
+  return (await res.json()).value;
 }
 
-let APP_URL = "";
-let TOKEN = "";
-async function api(method, body) {
-  const headers = { "Content-Type": "application/json" };
-  if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
-  if (process.env.ADMIN_PIN) headers["x-pin"] = process.env.ADMIN_PIN;
-  const res = await fetch(`${APP_URL}/api/settings`, {
+async function jobs(method, body) {
+  const res = await fetch(`${APP_URL}/api/jobs`, {
     method,
-    headers,
+    headers: { Authorization: `Bearer ${await githubToken()}`, "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(20000),
+    signal: AbortSignal.timeout(30000),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
   return data;
 }
 
-// --- 1) podesavanja
-let settings = sanitize({ ntfyTopic: process.env.NTFY_TOPIC || "" });
-let fromApp = false;
+// --- 1) korisnici
+let targets = [], zips = ["32068"];
 try {
-  TOKEN = await githubToken();
+  ({ targets, zips } = await jobs("GET"));
 } catch (e) {
-  gh("warning", `GitHub token nije dobijen: ${e.message}`);
-}
-for (const url of CANDIDATES) {
-  APP_URL = url;
-  try {
-    const data = await api("GET");
-    if (!data.options) continue;
-    if (!data.storage) { gh("warning", `${url}: baza nije povezana - koristim zadana podesavanja.`); break; }
-    if (data.authorized) {
-      settings = sanitize({ ...data.settings, ntfyTopic: data.settings.ntfyTopic || settings.ntfyTopic });
-      fromApp = true;
-    } else gh("warning", `${url}: stranica nije prihvatila GitHub token.`);
-    break;
-  } catch {
-    APP_URL = "";
-  }
-}
-if (!APP_URL) gh("warning", "Vercel stranica nije pronadjena - koristim zadana podesavanja.");
-
-if (process.argv.includes("--test")) {
-  const r = await sendNtfy(settings, t(settings.lang).testTitle, t(settings.lang).githubTest, APP_URL);
-  gh(r.sent ? "notice" : "error", `Probna poruka: ${r.sent ? "poslana" : r.reason}`);
-  process.exit(r.sent ? 0 : 1);
-}
-
-// --- 2) provjera
-let result;
-try {
-  result = await checkStock({ zip: settings.zip, maxMiles: settings.maxMiles, filters: filtersOf(settings) });
-} catch (err) {
-  gh("error", `Provjera nije uspjela: ${err.message}`);
-  if (fromApp) await api("POST", { action: "status", status: { error: err.message, checkedAt: new Date().toISOString() } }).catch(() => {});
+  gh("error", `Ne mogu dobiti listu korisnika sa ${APP_URL}: ${e.message}`);
   process.exit(1);
 }
 
-// --- 3) obavijesti
+// --- 2) Apple, jednom po ZIP-u
+const results = {};
+for (const zip of zips) {
+  try {
+    results[zip] = await checkStock({ zip, maxMiles: 500, filters: {} });
+  } catch (e) {
+    gh("warning", `ZIP ${zip}: ${e.message}`);
+    results[zip] = { error: e.message, checkedAt: new Date().toISOString(), zip };
+  }
+}
+
+// --- 3) obavijesti po korisniku
 const now = Date.now();
-const prev = existsSync(STATE) ? JSON.parse(readFileSync(STATE, "utf8")) : {};
-const state = {};
-const toSend = [];
-for (const a of result.available) {
-  const last = Array.isArray(prev) ? (prev.includes(a.key) ? now : 0) : prev[a.key] || 0;
-  const due = !last || (settings.repeatHours > 0 && now - last >= settings.repeatHours * 3600e3);
-  if (due) toSend.push(a);
-  state[a.key] = due ? now : last;
-}
-writeFileSync(STATE, JSON.stringify(state));
+let prev = existsSync(STATE) ? JSON.parse(readFileSync(STATE, "utf8")) : {};
+if (Object.keys(prev).some((k) => k.includes("|"))) prev = { legacy: prev }; // stari format stanja
+const next = {};
+const log = [];
 
-let notified = "";
-if (!settings.enabled) {
-  notified = "obavijesti iskljucene";
-} else if (toSend.length) {
-  const lines = toSend.map((a) => `${a.title} - ${a.store} (${a.distance} mi) ${a.quote}`.trim());
-  const r = await sendNtfy(settings, t(settings.lang).stockTitle, lines.join("\n"), APP_URL || result.buyUrl);
-  notified = r.sent ? `poslano (${toSend.length})` : `NIJE poslano: ${r.reason}`;
-  gh(r.sent ? "notice" : "error", `Obavijest ${notified}:%0A${lines.join("%0A")}`);
-} else {
-  notified = "nista novo";
+for (const { id, settings: s } of targets) {
+  const r = results[s.zip];
+  if (!r || r.error) continue;
+  const f = filtersOf(s);
+  const hits = r.stores
+    .filter((st) => st.distance <= s.maxMiles)
+    .flatMap((st) => st.items.filter((i) => i.available && isWanted(i, f)).map((i) => ({ ...i, store: st.name, storeId: st.id, distance: st.distance })));
+  const mine = prev[id] || {};
+  const state = {};
+  const toSend = [];
+  for (const h of hits) {
+    const key = `${h.storeId}|${h.part}`;
+    const last = mine[key] || 0;
+    const due = !last || (s.repeatHours > 0 && now - last >= s.repeatHours * 3600e3);
+    if (due) toSend.push(h);
+    state[key] = due ? now : last;
+  }
+  next[id] = state;
+
+  let outcome = `${hits.length} na stanju`;
+  if (toSend.length && s.enabled && s.ntfyTopic) {
+    const lines = toSend.map((h) => `${h.title} - ${h.store} (${h.distance} mi) ${h.quote}`.trim());
+    const res = await sendNtfy(s, t(s.lang).stockTitle, lines.join("\n"), APP_URL);
+    outcome += res.sent ? `, poslano ${toSend.length}` : `, NIJE poslano (${res.reason})`;
+  } else if (toSend.length) {
+    outcome += ", obavijesti iskljucene ili bez topica";
+  }
+  log.push(`${id === "legacy" ? "legacy" : id.slice(-4)} ZIP ${s.zip}/${s.maxMiles}mi [${f.models.join(",")}]: ${outcome}`);
+}
+writeFileSync(STATE, JSON.stringify(next));
+
+// --- 4) rezultati stranici
+const statuses = Object.fromEntries(Object.entries(results).map(([zip, r]) => [zip, { ...r, source: "github" }]));
+try {
+  await jobs("POST", { statuses });
+} catch (e) {
+  gh("warning", `Rezultati nisu spremljeni: ${e.message}`);
 }
 
-const summary = result.stores.map((s) => {
-  const w = s.items.filter((i) => i.wanted);
-  return `${s.name} (${s.distance} mi): trazeno ${w.filter((i) => i.available).length}/${w.length}, ostalo dostupno ${s.items.filter((i) => !i.wanted && i.available).length}`;
-});
-gh(
-  "notice",
-  `${result.partsChecked} part br., ${result.wantedConfigs} trazenih konfig., podesavanja: ${fromApp ? "sa stranice" : "zadana"}, obavijest: ${notified}%0A` +
-    summary.join("%0A")
+const zipInfo = Object.entries(results).map(([zip, r]) =>
+  r.error ? `${zip}: greska` : `${zip}: ${r.stores.length} ducana, ${r.stores.reduce((n, s) => n + s.items.filter((i) => i.available).length, 0)} konfig. na stanju`
 );
-
-// --- 4) rezultat nazad na stranicu
-if (fromApp) {
-  const compact = {
-    ...result,
-    source: "github",
-    notified,
-    stores: result.stores.map((s) => ({
-      ...s,
-      items: s.items.map(({ part, title, model, storage, color, available, quote, wanted }) => ({
-        part, title, model, storage, color, available, quote, wanted,
-      })),
-    })),
-  };
-  await api("POST", { action: "status", status: compact }).catch((e) => gh("warning", `Status nije spremljen: ${e.message}`));
-}
+gh("notice", `Korisnika: ${targets.length}, ZIP-ova: ${zips.length}%0A${zipInfo.join("%0A")}%0A${log.join("%0A")}`);

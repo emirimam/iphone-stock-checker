@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>iPhone Stock</title>
+<meta name="description" content="Get notified when an iPhone is available for pickup at an Apple Store near you.">
 <style>
   :root {
     --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
@@ -43,6 +44,37 @@
   .group { margin-top: 10px; }
   .group-label { font-size: 12.5px; color: var(--muted); margin-bottom: 5px; }
   details.settings { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin-top: 28px; }
+  /* tabovi */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 6px 0 18px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { background: transparent; color: var(--muted); border-radius: 0; padding: 10px 12px; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+  .topright { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .me { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .me img { width: 26px; height: 26px; border-radius: 50%; }
+  .me .who { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  button.link { background: none; color: var(--accent); padding: 0; font-weight: 500; font-size: 13px; }
+  .badge { font-size: 11px; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0 6px; }
+  .gbtn { min-height: 32px; }
+  /* uputstva */
+  .guide h2 { margin: 22px 0 8px; } .guide h2:first-child { margin-top: 4px; }
+  .guide p, .guide li { color: var(--text); } .guide li { margin: 4px 0; } .guide ol, .guide ul { padding-left: 20px; }
+  .guide code { background: var(--no-bg); padding: 1px 6px; border-radius: 6px; font-size: 13px; }
+  .guide a { color: var(--accent); }
+  /* admin */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .kv { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; } .kl { color: var(--muted); font-size: 12.5px; }
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 160px; margin-top: 12px; }
+  .chart .col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
+  .chart .bars { flex: 1; width: 100%; display: flex; align-items: flex-end; gap: 1px; }
+  .chart .b { flex: 1; border-radius: 3px 3px 0 0; min-height: 1px; }
+  .b.views, .sw.views { background: var(--accent); } .b.visitors, .sw.visitors { background: var(--ok); }
+  .chart .d { font-size: 9px; color: var(--muted); margin-top: 3px; }
+  .legend { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-left: 8px; }
+  table.users { min-width: 640px; }
+  @media (max-width: 560px) { .top { flex-direction: column; } .topright { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; } }
   details.settings > summary { padding: 14px 16px; font-weight: 600; cursor: pointer; list-style: none; }
   details.settings > summary::-webkit-details-marker { display: none; }
   details.settings > summary::after { content: "▾"; float: right; color: var(--muted); }
@@ -92,57 +124,66 @@
 <body>
 <main>
   <div class="top">
-    <h1 data-i18n="title"></h1>
-    <div class="lang" role="group" aria-label="Language">
-      <button type="button" data-lang="en">EN</button>
-      <button type="button" data-lang="bs">BS</button>
+    <div>
+      <h1 data-i18n="title"></h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="topright">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="bs">BS</button>
+      </div>
+      <div id="account"></div>
     </div>
   </div>
-  <p class="sub" id="sub"></p>
 
-  <div class="bar">
-    <button id="live" data-i18n="checkNow"></button>
-    <span class="status" id="status"></span>
-  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="stock" data-i18n="tabStock"></button>
+    <button role="tab" data-tab="compare" data-i18n="tabCompare"></button>
+    <button role="tab" data-tab="guide" data-i18n="tabGuide"></button>
+    <button role="tab" data-tab="settings" data-i18n="tabSettings"></button>
+    <button role="tab" data-tab="admin" data-i18n="tabAdmin" hidden></button>
+  </nav>
 
   <div id="setup"></div>
-  <div id="banner"></div>
 
-  <h2 data-i18n="wantedTitle"></h2>
-  <div id="wanted"><div class="banner no" data-i18n="loading"></div></div>
-
-  <h2 data-i18n="othersTitle"></h2>
-  <div id="others"><div class="banner no" data-i18n="loading"></div></div>
-
-  <details class="settings" id="compareBox">
-    <summary data-i18n="cmpTitle"></summary>
-    <div class="sbody">
-      <div class="opts" id="cmpModels"></div>
-      <label class="switch" style="margin:12px 0"><input type="checkbox" id="cmpDiff"> <span data-i18n="cmpOnlyDiff"></span></label>
-      <div id="cmpTable"></div>
+  <!-- ===== STOCK ===== -->
+  <section class="tab" id="tab-stock">
+    <div class="bar">
+      <button id="live" data-i18n="checkNow"></button>
+      <span class="status" id="status"></span>
     </div>
-  </details>
+    <div id="anonHint"></div>
+    <div id="banner"></div>
+    <h2 data-i18n="wantedTitle"></h2>
+    <div id="wanted"><div class="banner no" data-i18n="loading"></div></div>
+    <h2 data-i18n="othersTitle"></h2>
+    <div id="others"><div class="banner no" data-i18n="loading"></div></div>
+  </section>
 
-  <details class="settings" id="settingsBox" style="margin-top:12px">
-    <summary data-i18n="settingsTitle"></summary>
-    <div class="sbody">
-      <div id="newPinBox" style="display:none">
-        <p class="hint" style="margin:0 0 10px" data-i18n="newPinHint"></p>
-        <div class="row">
-          <label class="f"><span data-i18n="newPin"></span><input id="newPin" type="password" autocomplete="new-password"></label>
-          <label class="f"><span data-i18n="repeatPin"></span><input id="newPin2" type="password" autocomplete="new-password"></label>
-        </div>
-        <div class="actions"><button id="setPin" data-i18n="setPin"></button><span class="msg" id="newPinMsg"></span></div>
-      </div>
-      <div id="loginBox">
-        <div class="row">
-          <label class="f"><span data-i18n="pinLabel"></span><input id="pin" type="password" autocomplete="current-password"></label>
-        </div>
-        <div class="actions"><button id="login" data-i18n="unlock"></button><span class="msg" id="loginMsg"></span></div>
-        <p class="hint" data-i18n="pinHint"></p>
-      </div>
+  <!-- ===== COMPARE ===== -->
+  <section class="tab" id="tab-compare" hidden>
+    <h2 data-i18n="cmpTitle" style="margin-top:8px"></h2>
+    <div class="opts" id="cmpModels"></div>
+    <label class="switch" style="margin:12px 0"><input type="checkbox" id="cmpDiff"> <span data-i18n="cmpOnlyDiff"></span></label>
+    <div id="cmpTable"></div>
+  </section>
 
-      <form id="form" class="locked" onsubmit="return false">
+  <!-- ===== GUIDE ===== -->
+  <section class="tab guide" id="tab-guide" hidden>
+    <div data-i18n-html="guideHtml"></div>
+  </section>
+
+  <!-- ===== SETTINGS ===== -->
+  <section class="tab" id="tab-settings" hidden>
+    <div id="signInPrompt" class="card" hidden>
+      <h3 data-i18n="signInTitle"></h3>
+      <p class="hint" data-i18n="signInText" style="margin:6px 0 12px"></p>
+      <div class="gbtn" data-gbtn></div>
+    </div>
+
+    <form id="form" onsubmit="return false" hidden>
+      <div class="card">
         <fieldset>
           <legend data-i18n="whichPhone"></legend>
           <div class="opts" id="models"></div>
@@ -153,19 +194,23 @@
           <div class="opts" id="storages"></div>
           <p class="hint" data-i18n="anyHint"></p>
         </fieldset>
-        <fieldset>
+        <fieldset style="margin-bottom:0">
           <legend data-i18n="color"></legend>
           <div class="opts" id="colors"></div>
           <p class="hint" data-i18n="anyHint"></p>
         </fieldset>
-        <fieldset>
+      </div>
+      <div class="card">
+        <fieldset style="margin-bottom:0">
           <legend data-i18n="location"></legend>
           <div class="row">
             <label class="f"><span data-i18n="zip"></span><input id="zip" inputmode="numeric" maxlength="5"></label>
             <label class="f"><span data-i18n="maxMiles"></span><input id="maxMiles" type="number" min="1" max="500"></label>
           </div>
         </fieldset>
-        <fieldset>
+      </div>
+      <div class="card">
+        <fieldset style="margin-bottom:0">
           <legend data-i18n="notifications"></legend>
           <label class="switch"><input type="checkbox" id="enabled"> <span data-i18n="sendNotifications"></span></label>
           <div class="row" style="margin-top:12px">
@@ -192,14 +237,41 @@
           </div>
           <p class="hint" data-i18n-html="ntfyHint"></p>
         </fieldset>
-        <div class="actions">
-          <button id="save" data-i18n="save"></button>
-          <button id="test" class="ghost" data-i18n="sendTest"></button>
-          <span class="msg" id="saveMsg"></span>
-        </div>
-      </form>
+      </div>
+      <div class="actions">
+        <button id="save" data-i18n="save"></button>
+        <button id="test" class="ghost" data-i18n="sendTest"></button>
+        <span class="msg" id="saveMsg"></span>
+      </div>
+    </form>
+
+    <div id="claimBox" class="card" hidden style="margin-top:16px">
+      <h3 data-i18n="claimTitle"></h3>
+      <p class="hint" data-i18n="claimText" style="margin:6px 0 10px"></p>
+      <div class="row"><label class="f"><span data-i18n="pinLabel"></span><input id="claimPin" type="password" autocomplete="current-password"></label></div>
+      <div class="actions"><button id="claim" data-i18n="claimBtn"></button><span class="msg" id="claimMsg"></span></div>
     </div>
-  </details>
+  </section>
+
+  <!-- ===== ADMIN (owner) ===== -->
+  <section class="tab" id="tab-admin" hidden>
+    <div class="kpis" id="kpis"></div>
+    <div class="card">
+      <h3 data-i18n="adminDaily"></h3>
+      <div class="chart" id="chart"></div>
+      <div class="legend"><span class="sw views"></span><span data-i18n="views"></span><span class="sw visitors"></span><span data-i18n="visitors"></span></div>
+    </div>
+    <div class="card">
+      <h3 data-i18n="adminUsers"></h3>
+      <div id="usersTable" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <h3>Google Client ID</h3>
+      <p class="hint" data-i18n="clientIdHint" style="margin:6px 0 10px"></p>
+      <div class="row"><label class="f">Client ID<input id="adminClientId" spellcheck="false"></label></div>
+      <div class="actions"><button id="saveClientId" data-i18n="save"></button><span class="msg" id="adminMsg"></span></div>
+    </div>
+  </section>
 
   <footer data-i18n="footer"></footer>
 </main>
@@ -208,197 +280,251 @@ const I18N = {
   en: {
     title: "iPhone Stock",
     sub: (miles, zip) => `Apple Store pickup within ${miles} miles of ZIP ${zip}.`,
-    subDefault: "Apple Store pickup nearby.",
-    checkNow: "Check now",
-    checking: "Checking…",
-    loading: "Loading…",
-    wantedTitle: "Phones I'm looking for",
-    othersTitle: "Other phones in stock",
-    settingsTitle: "Settings & notifications",
-    newPinHint: "First time here: choose a PIN (at least 4 characters). You'll use it to unlock the settings.",
-    newPin: "New PIN",
-    repeatPin: "Repeat PIN",
-    setPin: "Set PIN",
-    pinLabel: "PIN to edit",
-    unlock: "Unlock",
-    pinHint: "Without the PIN, settings are view-only.",
+    subDefault: "Apple Store pickup availability.",
+    tabStock: "Stock", tabCompare: "Compare", tabGuide: "Guide", tabSettings: "Settings", tabAdmin: "Admin",
+    signIn: "Sign in", signOut: "Sign out", owner: "owner",
+    checkNow: "Check now", checking: "Checking…", loading: "Loading…",
+    wantedTitle: "Phones I'm looking for", othersTitle: "Other phones in stock",
+    anonHint: "You're viewing the default search (iPhone 18 Pro Max near ZIP 32068). <b>Sign in with Google</b> in Settings to pick your own phone, location and notifications.",
+    signInTitle: "Sign in to set up your alerts",
+    signInText: "Each account has its own phone, location and notifications. We only store your name and email from Google.",
     whichPhone: "Which phone I'm looking for",
     whichPhoneHint: "You get notified for these models. All others are shown under “Other phones in stock”.",
-    storage: "Storage",
-    color: "Color",
-    anyHint: "Nothing selected = any.",
-    location: "Location",
-    zip: "ZIP code",
-    maxMiles: "Max distance (miles)",
-    notifications: "Notifications",
-    sendNotifications: "Send notifications",
-    emailOptional: "Email (optional)",
-    priority: "Priority",
-    prioMin: "Minimum (silent)",
-    prioLow: "Low",
-    prioDefault: "Normal",
-    prioHigh: "High",
-    prioUrgent: "Urgent (long ring)",
-    repeat: "Repeat reminder",
-    rep0: "Only when something new appears",
-    rep1: "Every hour while in stock",
-    rep3: "Every 3 hours",
-    rep6: "Every 6 hours",
-    rep12: "Every 12 hours",
-    ntfyHint: "Install the <b>ntfy</b> app on your phone and subscribe to the same topic. Leave topic and email empty to keep the current values. Notifications are sent in the language selected above.",
-    cmpTitle: "Compare models",
-    cmpOnlyDiff: "Show only differences",
-    cmpPick: "Select at least one model.",
-    cmpStockRow: "In stock nearby",
-    cmpInStock: (n, s) => `${n} config${n === 1 ? "" : "s"} in ${s} store${s === 1 ? "" : "s"}`,
-    cmpNone: "none right now",
-    cmpWanted: "watching",
-    cmpNote: "Specs from Apple's iPhone comparison page. Storage for Air/17/17e is taken from the configurations Apple stores currently list. Stock comes from the last check.",
-    save: "Save",
-    sendTest: "Send test notification",
-    footer: "GitHub checks stock every 15 minutes and notifies you about the phones you're looking for. “Check now” runs a check immediately.",
-    notSet: "not set",
-    justNow: "just now",
-    minAgo: (m) => `${m} min ago`,
-    hAgo: (h, m) => `${h} h ${m} min ago`,
-    lastAuto: "Last automatic check",
-    lastLive: "Last live check",
+    storage: "Storage", color: "Color", anyHint: "Nothing selected = any.",
+    location: "Location", zip: "ZIP code", maxMiles: "Max distance (miles)",
+    notifications: "Notifications", sendNotifications: "Send notifications", emailOptional: "Email (optional)",
+    priority: "Priority", prioMin: "Minimum (silent)", prioLow: "Low", prioDefault: "Normal", prioHigh: "High", prioUrgent: "Urgent (long ring)",
+    repeat: "Repeat reminder", rep0: "Only when something new appears", rep1: "Every hour while in stock",
+    rep3: "Every 3 hours", rep6: "Every 6 hours", rep12: "Every 12 hours",
+    ntfyHint: "Install the <b>ntfy</b> app and subscribe to the same topic (see the Guide tab). Leave topic and email empty to keep the current values. Notifications are sent in the language selected at the top.",
+    save: "Save", sendTest: "Send test notification",
+    footer: "Stock is checked automatically every 15 minutes. “Check now” runs a check immediately. Not affiliated with Apple.",
+    notSet: "not set", justNow: "just now",
+    minAgo: (m) => `${m} min ago`, hAgo: (h, m) => `${h} h ${m} min ago`,
+    lastAuto: "Last automatic check", lastLive: "Last live check",
     lastFailed: (e) => `Last check failed: ${e}`,
-    wantedInStock: (n) => `Wanted phones in stock: ${n}`,
-    orderPickup: "order online for pickup",
+    wantedInStock: (n) => `Wanted phones in stock: ${n}`, orderPickup: "order online for pickup",
     noneWanted: "None of the phones you're looking for are available for pickup right now.",
-    noStores: (miles) => `No Apple Store within ${miles} miles. Increase the distance in settings.`,
+    noStores: (miles) => `No Apple Store within ${miles} miles. Increase the distance in Settings.`,
     availableOf: (a, n) => `${a}/${n} available`,
     noConfigs: "Apple doesn't offer any configuration matching your filters.",
     noOthers: "No other models are in stock right now.",
-    warnStorage: "The page can't see the database. If you just connected it, open <b>Deployments</b> in Vercel and click <b>⋯ → Redeploy</b> on the latest one.",
-    warnPin: "Set a PIN: open <b>Settings & notifications</b> at the bottom of the page.",
-    warnTopic: "Notifications don't have an ntfy topic yet. Set it in Settings.",
-    loadFailed: (e) => `Couldn't load settings: ${e}`,
-    liveFailed: (e) => `Live check failed (${e}).`,
-    showingLast: " Showing the last automatic check.",
-    pinShort: "PIN must be at least 4 characters.",
-    pinMismatch: "PINs don't match.",
-    pinSet: "PIN set. Now choose your phone and enter your ntfy topic.",
-    saving: "Saving…",
-    saved: "Saved. The next automatic check will use the new settings.",
-    sending: "Sending…",
-    testSent: "Test notification sent — check your phone.",
+    liveFailed: (e) => `Live check failed (${e}).`, showingLast: " Showing the last automatic check.",
+    saving: "Saving…", saved: "Saved. The next automatic check will use the new settings.",
+    sending: "Sending…", testSent: "Test notification sent — check your phone.",
+    claimTitle: "Are you the owner of this app?",
+    claimText: "Enter the PIN you set earlier. Your account becomes the owner: you'll see the Admin tab with visitor stats, and your previous settings move to your account.",
+    pinLabel: "PIN", claimBtn: "Become owner", claimed: "You're the owner now.",
+    setupClientTitle: "Owner setup: Google sign-in is not configured yet",
+    setupClientText: "Paste the Google OAuth Client ID and your PIN. Instructions are in the Guide tab.",
+    setupPinTitle: "Owner setup: choose a PIN first",
+    newPin: "New PIN", repeatPin: "Repeat PIN", setPin: "Set PIN",
+    pinShort: "PIN must be at least 4 characters.", pinMismatch: "PINs don't match.",
+    saveClientId: "Save Client ID", clientSaved: "Saved. Reloading…",
+    warnStorage: "The page can't see the database. In Vercel open <b>Deployments</b> and click <b>⋯ → Redeploy</b> on the latest one.",
+    adminDaily: "Last 30 days", adminUsers: "Registered users", views: "Page views", visitors: "Unique visitors",
+    kTotalViews: "Total page views", kVisitors: "Unique visitors", kToday: "Today (views / visitors)", kUsers: "Registered users",
+    uEmail: "User", uZip: "ZIP", uModels: "Watching", uNotif: "Alerts", uLast: "Last seen", uSince: "Joined",
+    clientIdHint: "From Google Cloud Console → Credentials. Change it only if you create a new OAuth client.",
+    yes: "on", no: "off",
     err: {
-      pin_required: "Enter your PIN.",
-      pin_wrong: "Wrong PIN.",
-      pin_not_set: "PIN has not been set yet.",
-      pin_short: "PIN must be at least 4 characters.",
-      pin_exists: "PIN is already set.",
-      no_storage: "Database is not connected.",
-      no_topic: "Enter an ntfy topic first.",
+      sign_in: "Please sign in with Google first.", pin_wrong: "Wrong PIN.", pin_not_set: "PIN has not been set yet.",
+      pin_short: "PIN must be at least 4 characters.", pin_exists: "PIN is already set.", no_storage: "Database is not connected.",
+      no_topic: "Enter an ntfy topic first.", owner_exists: "This app already has an owner.", owner_only: "Owner only.",
+      bad_client_id: "That doesn't look like a Google Client ID (ends with .apps.googleusercontent.com).",
+      google_failed: "Google sign-in could not be verified.",
     },
+    guideHtml: `
+<h2>How it works</h2>
+<p>This app watches Apple Store <b>in-store pickup</b> availability for iPhones near a US ZIP code. Every 15 minutes it checks Apple's stock, and when a phone you're looking for becomes available it sends a push notification to your phone. Then you order it online on apple.com with pickup at that store — that reserves the phone for you.</p>
+
+<h2>1. Sign in</h2>
+<p>Open <b>Settings</b> and click <b>Sign in with Google</b>. Each account has its own phone, location and notifications. Without signing in you can still browse stock for the default search.</p>
+
+<h2>2. Choose your phone</h2>
+<ol>
+<li>In <b>Settings → Which phone I'm looking for</b>, select one or more models.</li>
+<li>Optionally select <b>Storage</b> and <b>Color</b>. Nothing selected means any.</li>
+<li>Enter the <b>ZIP code</b> where you'll pick it up and the <b>max distance</b> you're willing to drive.</li>
+</ol>
+
+<h2>3. Get notifications on your phone (ntfy)</h2>
+<ol>
+<li>Install the free <b>ntfy</b> app from the App Store or Google Play.</li>
+<li>Open it, tap <b>+</b>, type a topic name only you know (e.g. <code>john-iphone-7f3k9</code>) and tap <b>Subscribe</b>. Anyone who knows the topic name can read it, so make it hard to guess.</li>
+<li>Enter the same topic in <b>Settings → ntfy topic</b>, click <b>Save</b>, then <b>Send test notification</b>. It should arrive within seconds.</li>
+<li>Optional: add an <b>email</b> to also get alerts by email, set <b>Priority</b> (Urgent rings longer) and <b>Repeat reminder</b>.</li>
+</ol>
+
+<h2>4. When you get an alert</h2>
+<ul>
+<li>Open the notification — it lists the model, the store and the distance.</li>
+<li>Order on apple.com and choose <b>pickup</b> at that store. Stock changes quickly, so act fast.</li>
+<li>Walking in without an order is possible but not guaranteed — walk-ins are served after online orders.</li>
+</ul>
+
+<h2>Other tabs</h2>
+<ul>
+<li><b>Stock</b> — phones you're looking for (green = available) and all other iPhones currently in stock near you.</li>
+<li><b>Compare</b> — differences between iPhone 18 Pro Max, 18 Pro, Air, 17 and 17e, plus current stock for each.</li>
+</ul>
+
+<h2>Privacy</h2>
+<p>From Google we store only your name, email and profile picture. Your settings are stored to run your alerts. Visits are counted anonymously (a random ID in your browser, no IP addresses).</p>
+
+<h2>Owner setup (app owner only)</h2>
+<ol>
+<li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console → APIs &amp; Services → Credentials</a> (create a project if asked).</li>
+<li><b>OAuth consent screen</b>: choose <b>External</b>, fill in the app name and your email, save. Then <b>Publish app</b> so anyone can sign in.</li>
+<li><b>Create credentials → OAuth client ID</b> → type <b>Web application</b>.</li>
+<li>Under <b>Authorized JavaScript origins</b> add this page's address, e.g. <code>https://iphone-stock-checker-hazel.vercel.app</code>. No redirect URI is needed.</li>
+<li>Copy the <b>Client ID</b> (ends with <code>.apps.googleusercontent.com</code>) and paste it in the yellow setup box at the top of this page together with your PIN.</li>
+<li>Sign in with Google, open <b>Settings</b> and use <b>Become owner</b> with your PIN. The <b>Admin</b> tab with visitor stats appears.</li>
+</ol>`,
+    cmpTitle: "Compare models", cmpOnlyDiff: "Show only differences", cmpPick: "Select at least one model.",
+    cmpStockRow: "In stock nearby",
+    cmpInStock: (n, s) => `${n} config${n === 1 ? "" : "s"} in ${s} store${s === 1 ? "" : "s"}`,
+    cmpNone: "none right now", cmpWanted: "watching",
+    cmpNote: "Specs from Apple's iPhone comparison page. Storage for Air/17/17e is taken from the configurations Apple stores currently list. Stock comes from the last check.",
   },
   bs: {
     title: "iPhone zalihe",
     sub: (miles, zip) => `Apple Store preuzimanje do ${miles} milja od ZIP ${zip}.`,
-    subDefault: "Apple Store preuzimanje u blizini.",
-    checkNow: "Provjeri sada",
-    checking: "Provjeravam…",
-    loading: "Učitavam…",
-    wantedTitle: "Traženi telefoni",
-    othersTitle: "Ostali dostupni telefoni",
-    settingsTitle: "Podešavanja i obavijesti",
-    newPinHint: "Prvi put ovdje: izaberi PIN (najmanje 4 znaka). Njime ćeš otključavati podešavanja.",
-    newPin: "Novi PIN",
-    repeatPin: "Ponovi PIN",
-    setPin: "Postavi PIN",
-    pinLabel: "PIN za izmjene",
-    unlock: "Otključaj",
-    pinHint: "Bez PIN-a podešavanja su samo za pregled.",
+    subDefault: "Dostupnost iPhonea za preuzimanje u Apple Storeu.",
+    tabStock: "Stanje", tabCompare: "Poređenje", tabGuide: "Uputstva", tabSettings: "Podešavanja", tabAdmin: "Admin",
+    signIn: "Prijava", signOut: "Odjava", owner: "vlasnik",
+    checkNow: "Provjeri sada", checking: "Provjeravam…", loading: "Učitavam…",
+    wantedTitle: "Traženi telefoni", othersTitle: "Ostali dostupni telefoni",
+    anonHint: "Gledaš zadanu pretragu (iPhone 18 Pro Max kod ZIP 32068). <b>Prijavi se Googleom</b> u Podešavanjima da izabereš svoj telefon, lokaciju i obavijesti.",
+    signInTitle: "Prijavi se da podesiš obavijesti",
+    signInText: "Svaki nalog ima svoj telefon, lokaciju i obavijesti. Od Googlea čuvamo samo ime i email.",
     whichPhone: "Koji telefon tražim",
     whichPhoneHint: "Za ove modele stiže obavijest. Svi ostali se prikazuju pod „Ostali dostupni telefoni“.",
-    storage: "Memorija",
-    color: "Boja",
-    anyHint: "Ništa označeno = bilo koja.",
-    location: "Lokacija",
-    zip: "ZIP kod",
-    maxMiles: "Najviše milja",
-    notifications: "Obavijesti",
-    sendNotifications: "Šalji obavijesti",
-    emailOptional: "Email (opcionalno)",
-    priority: "Prioritet",
-    prioMin: "Minimalan (bez zvuka)",
-    prioLow: "Nizak",
-    prioDefault: "Normalan",
-    prioHigh: "Visok",
-    prioUrgent: "Hitan (zvoni dugo)",
-    repeat: "Ponovi podsjetnik",
-    rep0: "Samo kad se pojavi novo",
-    rep1: "Svaki sat dok je dostupno",
-    rep3: "Svaka 3 sata",
-    rep6: "Svakih 6 sati",
-    rep12: "Svakih 12 sati",
-    ntfyHint: "Instaliraj aplikaciju <b>ntfy</b> na mobitel i pretplati se na isti topic. Polja za topic i email ostavi prazna da zadržiš postojeće vrijednosti. Obavijesti stižu na jeziku izabranom gore.",
-    cmpTitle: "Uporedi modele",
-    cmpOnlyDiff: "Prikaži samo razlike",
-    cmpPick: "Izaberi barem jedan model.",
-    cmpStockRow: "Na stanju u blizini",
-    cmpInStock: (n, s) => `${n} konfig. u ${s} ${s === 1 ? "dućanu" : "dućana"}`,
-    cmpNone: "trenutno nema",
-    cmpWanted: "pratim",
-    cmpNote: "Specifikacije sa Appleove stranice za poređenje iPhonea. Memorija za Air/17/17e uzeta je iz konfiguracija koje Apple trenutno nudi u dućanima. Stanje je iz zadnje provjere.",
-    save: "Sačuvaj",
-    sendTest: "Pošalji probnu poruku",
-    footer: "GitHub provjerava zalihe svakih 15 minuta i šalje obavijest za tražene modele. „Provjeri sada“ radi provjeru odmah.",
-    notSet: "nije postavljen",
-    justNow: "upravo",
-    minAgo: (m) => `prije ${m} min`,
-    hAgo: (h, m) => `prije ${h} h ${m} min`,
-    lastAuto: "Zadnja automatska provjera",
-    lastLive: "Zadnja provjera uživo",
+    storage: "Memorija", color: "Boja", anyHint: "Ništa označeno = bilo koja.",
+    location: "Lokacija", zip: "ZIP kod", maxMiles: "Najviše milja",
+    notifications: "Obavijesti", sendNotifications: "Šalji obavijesti", emailOptional: "Email (opcionalno)",
+    priority: "Prioritet", prioMin: "Minimalan (bez zvuka)", prioLow: "Nizak", prioDefault: "Normalan", prioHigh: "Visok", prioUrgent: "Hitan (zvoni dugo)",
+    repeat: "Ponovi podsjetnik", rep0: "Samo kad se pojavi novo", rep1: "Svaki sat dok je dostupno",
+    rep3: "Svaka 3 sata", rep6: "Svakih 6 sati", rep12: "Svakih 12 sati",
+    ntfyHint: "Instaliraj aplikaciju <b>ntfy</b> i pretplati se na isti topic (vidi tab Uputstva). Polja za topic i email ostavi prazna da zadržiš postojeće vrijednosti. Obavijesti stižu na jeziku izabranom gore.",
+    save: "Sačuvaj", sendTest: "Pošalji probnu poruku",
+    footer: "Zalihe se provjeravaju automatski svakih 15 minuta. „Provjeri sada“ radi provjeru odmah. Nije povezano s Appleom.",
+    notSet: "nije postavljen", justNow: "upravo",
+    minAgo: (m) => `prije ${m} min`, hAgo: (h, m) => `prije ${h} h ${m} min`,
+    lastAuto: "Zadnja automatska provjera", lastLive: "Zadnja provjera uživo",
     lastFailed: (e) => `Zadnja provjera nije uspjela: ${e}`,
-    wantedInStock: (n) => `Traženo na stanju: ${n}`,
-    orderPickup: "naruči online za preuzimanje",
+    wantedInStock: (n) => `Traženo na stanju: ${n}`, orderPickup: "naruči online za preuzimanje",
     noneWanted: "Trenutno nijedan traženi model nije dostupan za preuzimanje.",
-    noStores: (miles) => `Nema Apple Storea u radijusu od ${miles} milja. Povećaj udaljenost u podešavanjima.`,
+    noStores: (miles) => `Nema Apple Storea u radijusu od ${miles} milja. Povećaj udaljenost u Podešavanjima.`,
     availableOf: (a, n) => `dostupno ${a}/${n}`,
     noConfigs: "Za izabrane filtere Apple ne nudi nijednu konfiguraciju.",
     noOthers: "Trenutno nema drugih dostupnih modela.",
-    warnStorage: "Baza nije vidljiva stranici. Ako si je upravo povezao, u Vercelu otvori <b>Deployments</b> i na zadnjem klikni <b>⋯ → Redeploy</b>.",
-    warnPin: "Postavi PIN: otvori <b>Podešavanja i obavijesti</b> na dnu stranice.",
-    warnTopic: "Obavijesti još nemaju ntfy topic. Postavi ga u Podešavanjima.",
-    loadFailed: (e) => `Ne mogu učitati podešavanja: ${e}`,
-    liveFailed: (e) => `Provjera uživo nije uspjela (${e}).`,
-    showingLast: " Prikazujem zadnju automatsku provjeru.",
-    pinShort: "PIN mora imati najmanje 4 znaka.",
-    pinMismatch: "PIN-ovi se ne poklapaju.",
-    pinSet: "PIN postavljen. Sad izaberi telefon i upiši ntfy topic.",
-    saving: "Spremam…",
-    saved: "Sačuvano. Sljedeća automatska provjera koristi nova podešavanja.",
-    sending: "Šaljem…",
-    testSent: "Probna poruka poslana — provjeri mobitel.",
+    liveFailed: (e) => `Provjera uživo nije uspjela (${e}).`, showingLast: " Prikazujem zadnju automatsku provjeru.",
+    saving: "Spremam…", saved: "Sačuvano. Sljedeća automatska provjera koristi nova podešavanja.",
+    sending: "Šaljem…", testSent: "Probna poruka poslana — provjeri mobitel.",
+    claimTitle: "Jesi li ti vlasnik ove aplikacije?",
+    claimText: "Upiši PIN koji si ranije postavio. Tvoj nalog postaje vlasnik: vidjet ćeš tab Admin sa statistikom posjeta, a tvoja ranija podešavanja prelaze na tvoj nalog.",
+    pinLabel: "PIN", claimBtn: "Postani vlasnik", claimed: "Sada si vlasnik.",
+    setupClientTitle: "Podešavanje vlasnika: Google prijava još nije podešena",
+    setupClientText: "Zalijepi Google OAuth Client ID i upiši svoj PIN. Uputstva su u tabu Uputstva.",
+    setupPinTitle: "Podešavanje vlasnika: prvo izaberi PIN",
+    newPin: "Novi PIN", repeatPin: "Ponovi PIN", setPin: "Postavi PIN",
+    pinShort: "PIN mora imati najmanje 4 znaka.", pinMismatch: "PIN-ovi se ne poklapaju.",
+    saveClientId: "Sačuvaj Client ID", clientSaved: "Sačuvano. Učitavam ponovo…",
+    warnStorage: "Baza nije vidljiva stranici. U Vercelu otvori <b>Deployments</b> i na zadnjem klikni <b>⋯ → Redeploy</b>.",
+    adminDaily: "Zadnjih 30 dana", adminUsers: "Registrovani korisnici", views: "Pregledi", visitors: "Jedinstveni posjetioci",
+    kTotalViews: "Ukupno pregleda", kVisitors: "Jedinstvenih posjetilaca", kToday: "Danas (pregledi / posjetioci)", kUsers: "Registrovanih korisnika",
+    uEmail: "Korisnik", uZip: "ZIP", uModels: "Prati", uNotif: "Obavijesti", uLast: "Zadnje viđen", uSince: "Pridružio se",
+    clientIdHint: "Iz Google Cloud Console → Credentials. Mijenjaj samo ako napraviš novi OAuth klijent.",
+    yes: "uklj.", no: "isklj.",
     err: {
-      pin_required: "Unesi PIN.",
-      pin_wrong: "Pogrešan PIN.",
-      pin_not_set: "PIN još nije postavljen.",
-      pin_short: "PIN mora imati najmanje 4 znaka.",
-      pin_exists: "PIN je već postavljen.",
-      no_storage: "Baza nije povezana.",
-      no_topic: "Prvo upiši ntfy topic.",
+      sign_in: "Prvo se prijavi Googleom.", pin_wrong: "Pogrešan PIN.", pin_not_set: "PIN još nije postavljen.",
+      pin_short: "PIN mora imati najmanje 4 znaka.", pin_exists: "PIN je već postavljen.", no_storage: "Baza nije povezana.",
+      no_topic: "Prvo upiši ntfy topic.", owner_exists: "Aplikacija već ima vlasnika.", owner_only: "Samo za vlasnika.",
+      bad_client_id: "To ne liči na Google Client ID (završava na .apps.googleusercontent.com).",
+      google_failed: "Google prijava nije potvrđena.",
     },
+    guideHtml: `
+<h2>Kako radi</h2>
+<p>Aplikacija prati da li Apple Store u blizini američkog ZIP koda ima iPhone za <b>preuzimanje u dućanu</b>. Svakih 15 minuta provjerava Appleove zalihe i, kad se pojavi telefon koji tražiš, šalje ti push obavijest na mobitel. Onda ga naručiš online na apple.com s preuzimanjem u tom dućanu — tako je telefon rezervisan za tebe.</p>
+
+<h2>1. Prijava</h2>
+<p>Otvori <b>Podešavanja</b> i klikni <b>Sign in with Google</b>. Svaki nalog ima svoj telefon, lokaciju i obavijesti. Bez prijave možeš gledati zalihe za zadanu pretragu.</p>
+
+<h2>2. Izaberi telefon</h2>
+<ol>
+<li>U <b>Podešavanja → Koji telefon tražim</b> označi jedan ili više modela.</li>
+<li>Po želji označi <b>Memoriju</b> i <b>Boju</b>. Ništa označeno znači bilo koja.</li>
+<li>Upiši <b>ZIP kod</b> gdje ćeš preuzeti telefon i <b>najveću udaljenost</b> do koje si spreman voziti.</li>
+</ol>
+
+<h2>3. Obavijesti na mobitel (ntfy)</h2>
+<ol>
+<li>Instaliraj besplatnu aplikaciju <b>ntfy</b> iz App Storea ili Google Playa.</li>
+<li>Otvori je, klikni <b>+</b>, upiši naziv topica koji samo ti znaš (npr. <code>emir-iphone-7f3k9</code>) i klikni <b>Subscribe</b>. Ko zna naziv topica može ga čitati, pa neka bude teško pogoditi.</li>
+<li>Isti topic upiši u <b>Podešavanja → ntfy topic</b>, klikni <b>Sačuvaj</b>, pa <b>Pošalji probnu poruku</b>. Treba stići za nekoliko sekundi.</li>
+<li>Po želji dodaj <b>email</b> za obavijesti i emailom, podesi <b>Prioritet</b> (Hitan zvoni duže) i <b>Ponovi podsjetnik</b>.</li>
+</ol>
+
+<h2>4. Kad stigne obavijest</h2>
+<ul>
+<li>Otvori obavijest — piše model, dućan i udaljenost.</li>
+<li>Naruči na apple.com i izaberi <b>preuzimanje (pickup)</b> u tom dućanu. Zalihe se brzo mijenjaju, pa reaguj brzo.</li>
+<li>Dolazak bez narudžbe je moguć, ali bez garancije — kupci bez narudžbe čekaju iza online narudžbi.</li>
+</ul>
+
+<h2>Ostali tabovi</h2>
+<ul>
+<li><b>Stanje</b> — telefoni koje tražiš (zeleno = dostupno) i svi ostali iPhonei koji su trenutno na stanju u blizini.</li>
+<li><b>Poređenje</b> — razlike između iPhone 18 Pro Max, 18 Pro, Air, 17 i 17e, sa trenutnim stanjem za svaki.</li>
+</ul>
+
+<h2>Privatnost</h2>
+<p>Od Googlea čuvamo samo ime, email i profilnu sliku. Podešavanja čuvamo da bismo slali tvoje obavijesti. Posjete se broje anonimno (nasumični ID u pregledniku, bez IP adresa).</p>
+
+<h2>Podešavanje za vlasnika (samo vlasnik aplikacije)</h2>
+<ol>
+<li>Otvori <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console → APIs &amp; Services → Credentials</a> (ako traži, napravi projekat).</li>
+<li><b>OAuth consent screen</b>: izaberi <b>External</b>, upiši naziv aplikacije i svoj email, sačuvaj. Zatim klikni <b>Publish app</b> da se svako može prijaviti.</li>
+<li><b>Create credentials → OAuth client ID</b> → tip <b>Web application</b>.</li>
+<li>Pod <b>Authorized JavaScript origins</b> dodaj adresu ove stranice, npr. <code>https://iphone-stock-checker-hazel.vercel.app</code>. Redirect URI nije potreban.</li>
+<li>Kopiraj <b>Client ID</b> (završava na <code>.apps.googleusercontent.com</code>) i zalijepi ga u žuti okvir na vrhu stranice zajedno sa svojim PIN-om.</li>
+<li>Prijavi se Googleom, otvori <b>Podešavanja</b> i iskoristi <b>Postani vlasnik</b> sa svojim PIN-om. Pojavit će se tab <b>Admin</b> sa statistikom posjeta.</li>
+</ol>`,
+    cmpTitle: "Uporedi modele", cmpOnlyDiff: "Prikaži samo razlike", cmpPick: "Izaberi barem jedan model.",
+    cmpStockRow: "Na stanju u blizini",
+    cmpInStock: (n, s) => `${n} konfig. u ${s} ${s === 1 ? "dućanu" : "dućana"}`,
+    cmpNone: "trenutno nema", cmpWanted: "pratim",
+    cmpNote: "Specifikacije sa Appleove stranice za poređenje iPhonea. Memorija za Air/17/17e uzeta je iz konfiguracija koje Apple trenutno nudi u dućanima. Stanje je iz zadnje provjere.",
   },
 };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const BASE_COLORS = ["black", "silver", "glacier", "burgundy"];
-let state = { settings: null, options: null, status: null, last: null, authorized: false, pin: "" };
-
+const DEFAULTS = { zip: "32068", maxMiles: 60, models: ["18 pro max"], storages: [], colors: [] };
 const store = {
   get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
 };
-
+let state = { auth: null, user: null, settings: null, options: null, status: null, last: null };
 let lang = store.get("lang") || "en";
 const T = () => I18N[lang] || I18N.en;
 const errText = (e) => (e.code && T().err[e.code]) || e.message;
+const filters = () => state.settings || DEFAULTS;
 
+async function api(path, method = "GET", body) {
+  const r = await fetch(path, {
+    method, credentials: "same-origin",
+    headers: body ? { "Content-Type": "application/json" } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(d.error || `HTTP ${r.status}`); e.code = d.code; throw e; }
+  return d;
+}
+
+// ---------- language
 function applyLang() {
   document.documentElement.lang = lang;
   document.title = T().title;
@@ -408,33 +534,52 @@ function applyLang() {
   if (!state.last) $("sub").textContent = T().subDefault;
 }
 
+// ---------- tabs
+const TABS = ["stock", "compare", "guide", "settings", "admin"];
+function showTab(name) {
+  if (!TABS.includes(name) || (name === "admin" && !state.user?.isOwner)) name = "stock";
+  document.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  TABS.forEach((t) => { $(`tab-${t}`).hidden = t !== name; });
+  if (location.hash.slice(1) !== name) history.replaceState(null, "", `#${name}`);
+  if (name === "admin") loadAdmin();
+  if (name === "compare") renderCompare();
+}
+document.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
+window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
+
+// ---------- time
 function ago(iso) {
   const m = Math.round((Date.now() - new Date(iso)) / 60000);
   if (m < 1) return T().justNow;
   if (m < 60) return T().minAgo(m);
   return T().hAgo(Math.floor(m / 60), m % 60);
 }
+const fmtDate = (iso) => iso ? new Date(iso).toLocaleString(lang === "bs" ? "bs-BA" : "en-US", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
-async function api(method, body) {
-  const r = await fetch("/api/settings", {
-    method,
-    headers: { "Content-Type": "application/json", "x-pin": state.pin },
-    body: body ? JSON.stringify({ pin: state.pin, ...body }) : undefined,
-  });
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok) { const e = new Error(d.error || `HTTP ${r.status}`); e.code = d.code; throw e; }
-  return d;
+// ---------- filtering (wanted + distance) on the client
+function isWanted(i, f) {
+  return (!f.models?.length || f.models.includes(i.model)) &&
+    (!f.storages?.length || f.storages.includes(i.storage)) &&
+    (!f.colors?.length || f.colors.includes(i.color));
+}
+function applyFilters(raw) {
+  const f = filters();
+  const stores = (raw.stores || []).filter((s) => s.distance <= f.maxMiles)
+    .map((s) => ({ ...s, items: s.items.map((i) => ({ ...i, wanted: isWanted(i, f) })) }));
+  const available = stores.flatMap((s) => s.items.filter((i) => i.available && i.wanted));
+  return { ...raw, maxMiles: f.maxMiles, stores, available };
 }
 
-// ---------- results
-function render(d, extraBanner = "") {
-  if (!d) return;
-  state.last = d;
+// ---------- stock rendering
+function render(raw, extraBanner = "") {
+  if (!raw) return;
+  state.last = raw;
   const t = T();
-  if (d.error) {
-    $("banner").innerHTML = extraBanner + `<div class="banner err">${esc(t.lastFailed(d.error))}</div>`;
+  if (raw.error) {
+    $("banner").innerHTML = extraBanner + `<div class="banner err">${esc(t.lastFailed(raw.error))}</div>`;
     return;
   }
+  const d = applyFilters(raw);
   const locale = lang === "bs" ? "bs-BA" : "en-US";
   const label = d.source === "github" ? t.lastAuto : t.lastLive;
   $("status").textContent = `${label}: ${ago(d.checkedAt)} (${new Date(d.checkedAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })})`;
@@ -448,47 +593,155 @@ function render(d, extraBanner = "") {
   if (!d.stores.length) {
     const none = `<div class="banner no">${esc(t.noStores(d.maxMiles))}</div>`;
     $("wanted").innerHTML = none; $("others").innerHTML = none;
-    return;
+  } else {
+    $("wanted").innerHTML = d.stores.map((s) => {
+      const items = s.items.filter((i) => i.wanted);
+      if (!items.length) return "";
+      const avail = items.filter((i) => i.available).length;
+      return `<div class="card"><h3>${esc(s.name)}</h3>
+        <div class="meta">${esc(s.city)} · ${s.distance} mi · ${esc(t.availableOf(avail, items.length))}</div>
+        <div class="grid">${items.map((i) => `<span class="chip ${i.available ? "ok" : ""}" title="${esc(i.quote)}">${esc(i.title.replace(/^iPhone\s*/i, ""))}</span>`).join("")}</div></div>`;
+    }).join("") || `<div class="banner no">${esc(t.noConfigs)}</div>`;
+
+    const others = d.stores.map((s) => {
+      const items = s.items.filter((i) => !i.wanted && i.available);
+      if (!items.length) return "";
+      const groups = {};
+      for (const i of items) (groups[i.title.replace(/\s+\d+\s*(GB|TB)\b.*$/i, "")] ||= []).push(i);
+      return `<div class="card"><h3>${esc(s.name)}</h3><div class="meta">${esc(s.city)} · ${s.distance} mi</div>` +
+        Object.entries(groups).map(([g, list]) => `<div class="group"><div class="group-label">${esc(g)} · ${list.length}</div>
+          <div class="grid">${list.map((i) => `<span class="chip ok" title="${esc(i.quote)}">${esc([i.storage.toUpperCase(), i.color].filter(Boolean).join(" "))}</span>`).join("")}</div></div>`).join("") +
+        `</div>`;
+    }).join("");
+    $("others").innerHTML = others || `<div class="banner no">${esc(t.noOthers)}</div>`;
   }
 
-  $("wanted").innerHTML = d.stores.map((s) => {
-    const items = s.items.filter((i) => i.wanted);
-    if (!items.length) return "";
-    const avail = items.filter((i) => i.available).length;
-    return `<div class="card"><h3>${esc(s.name)}</h3>
-      <div class="meta">${esc(s.city)} · ${s.distance} mi · ${esc(t.availableOf(avail, items.length))}</div>
-      <div class="grid">${items.map((i) => `<span class="chip ${i.available ? "ok" : ""}" title="${esc(i.quote)}">${esc(i.title.replace(/^iPhone\s*/i, ""))}</span>`).join("")}</div></div>`;
-  }).join("") || `<div class="banner no">${esc(t.noConfigs)}</div>`;
-
-  const others = d.stores.map((s) => {
-    const items = s.items.filter((i) => !i.wanted && i.available);
-    if (!items.length) return "";
-    const groups = {};
-    for (const i of items) {
-      const g = i.title.replace(/\s+\d+\s*(GB|TB)\b.*$/i, "");
-      (groups[g] ||= []).push(i);
-    }
-    return `<div class="card"><h3>${esc(s.name)}</h3><div class="meta">${esc(s.city)} · ${s.distance} mi</div>` +
-      Object.entries(groups).map(([g, list]) => `<div class="group"><div class="group-label">${esc(g)} · ${list.length}</div>
-        <div class="grid">${list.map((i) => `<span class="chip ok" title="${esc(i.quote)}">${esc([i.storage.toUpperCase(), i.color].filter(Boolean).join(" "))}</span>`).join("")}</div></div>`).join("") +
-      `</div>`;
-  }).join("");
-  $("others").innerHTML = others || `<div class="banner no">${esc(t.noOthers)}</div>`;
-
-  const seen = new Set(BASE_COLORS);
-  d.stores.forEach((s) => s.items.forEach((i) => { if (i.color && state.settings && state.settings.models.includes(i.model)) seen.add(i.color); }));
-  if (state.options) renderOpts("colors", [...seen], state.settings?.colors || [], (c) => c);
-  renderCompare();
+  if (state.settings && state.options) {
+    const seen = new Set([...BASE_COLORS, ...state.settings.colors]);
+    (raw.stores || []).forEach((s) => s.items.forEach((i) => { if (i.color && state.settings.models.includes(i.model)) seen.add(i.color); }));
+    const keep = [...document.querySelectorAll('input[name="colors"]:checked')].map((i) => i.value);
+    renderOpts("colors", [...seen], keep.length ? keep : state.settings.colors, (c) => c);
+  }
+  if (!$("tab-compare").hidden) renderCompare();
 }
 
-// ---------- settings
+async function liveCheck() {
+  $("live").disabled = true;
+  $("live").textContent = T().checking;
+  $("status").textContent = "";
+  try {
+    const zip = filters().zip;
+    const d = await api(`/api/check?zip=${zip}&t=${Date.now()}`);
+    render(d);
+  } catch (e) {
+    const fallback = state.status && !state.status.error;
+    const b = `<div class="banner err">${esc(T().liveFailed(errText(e)))}${fallback ? esc(T().showingLast) : ""}</div>`;
+    if (fallback) render(state.status, b); else $("banner").innerHTML = b;
+  } finally {
+    $("live").disabled = false;
+    $("live").textContent = T().checkNow;
+    const el = $("status"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  }
+}
+$("live").addEventListener("click", liveCheck);
+
+// ---------- account / Google sign-in
+let gsiLoaded = null;
+function loadGsi() {
+  if (gsiLoaded) return gsiLoaded;
+  gsiLoaded = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client"; s.async = true;
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return gsiLoaded;
+}
+
+async function renderGoogleButtons() {
+  const id = state.auth?.googleClientId;
+  const slots = [...document.querySelectorAll("[data-gbtn]")];
+  if (!id || state.user) { slots.forEach((s) => (s.innerHTML = "")); return; }
+  try {
+    await loadGsi();
+    google.accounts.id.initialize({ client_id: id, callback: onGoogleCredential, auto_select: false, ux_mode: "popup" });
+    const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+    slots.forEach((el) => {
+      el.innerHTML = "";
+      google.accounts.id.renderButton(el, { theme: dark ? "filled_black" : "outline", size: "medium", text: "signin_with", shape: "pill", locale: lang });
+    });
+  } catch (e) { /* GSI nedostupan */ }
+}
+
+async function onGoogleCredential(resp) {
+  try {
+    await api("/api/auth", "POST", { credential: resp.credential });
+    await boot();
+    showTab(location.hash.slice(1) || "settings");
+  } catch (e) {
+    $("setup").innerHTML = `<div class="banner err">${esc(errText(e))}</div>`;
+  }
+}
+
+function renderAccount() {
+  const u = state.user;
+  if (u) {
+    $("account").innerHTML = `<div class="me">${u.picture ? `<img src="${esc(u.picture)}" alt="" referrerpolicy="no-referrer">` : ""}
+      <span class="who">${esc(u.name || u.email)}${u.isOwner ? ` <span class="badge">${esc(T().owner)}</span>` : ""}</span>
+      <button type="button" class="link" id="signOut">${esc(T().signOut)}</button></div>`;
+    $("signOut").onclick = async () => { await api("/api/auth", "DELETE"); try { google.accounts.id.disableAutoSelect(); } catch (e) {} await boot(); };
+  } else {
+    $("account").innerHTML = state.auth?.googleClientId ? `<div class="gbtn" data-gbtn></div>` : "";
+  }
+  document.querySelector('[data-tab="admin"]').hidden = !u?.isOwner;
+  renderGoogleButtons();
+}
+
+// ---------- owner setup banners (before Google sign-in works)
+function renderSetup() {
+  const a = state.auth, t = T();
+  if (!a) return;
+  if (!a.storage) { $("setup").innerHTML = `<div class="banner warn">${t.warnStorage}</div>`; return; }
+  if (a.googleClientId) { $("setup").innerHTML = ""; return; }
+  if (!a.pinConfigured) {
+    $("setup").innerHTML = `<div class="banner warn"><b>${esc(t.setupPinTitle)}</b>
+      <div class="row" style="margin-top:10px"><label class="f">${esc(t.newPin)}<input id="sp1" type="password"></label>
+      <label class="f">${esc(t.repeatPin)}<input id="sp2" type="password"></label></div>
+      <div class="actions"><button id="spBtn">${esc(t.setPin)}</button><span class="msg" id="spMsg"></span></div></div>`;
+    $("spBtn").onclick = async () => {
+      const a1 = $("sp1").value, a2 = $("sp2").value, m = $("spMsg"); m.className = "msg err";
+      if (a1.length < 4) return (m.textContent = t.pinShort);
+      if (a1 !== a2) return (m.textContent = t.pinMismatch);
+      try { await api("/api/admin", "POST", { action: "setpin", newPin: a1 }); await boot(); } catch (e) { m.textContent = errText(e); }
+    };
+    return;
+  }
+  $("setup").innerHTML = `<div class="banner warn"><b>${esc(t.setupClientTitle)}</b><div style="margin-top:4px">${esc(t.setupClientText)}</div>
+    <div class="row" style="margin-top:10px"><label class="f">Client ID<input id="scId" spellcheck="false" placeholder="123…apps.googleusercontent.com"></label>
+    <label class="f">PIN<input id="scPin" type="password"></label></div>
+    <div class="actions"><button id="scBtn">${esc(t.saveClientId)}</button><span class="msg" id="scMsg"></span></div></div>`;
+  $("scBtn").onclick = async () => {
+    const m = $("scMsg"); m.className = "msg";
+    try {
+      await api("/api/admin", "POST", { action: "clientId", clientId: $("scId").value, pin: $("scPin").value });
+      m.className = "msg ok"; m.textContent = t.clientSaved; await boot();
+    } catch (e) { m.className = "msg err"; m.textContent = errText(e); }
+  };
+}
+
+// ---------- settings form
 function renderOpts(id, values, selected, labelOf) {
   $(id).innerHTML = values.map((v) => `<label class="opt"><input type="checkbox" name="${id}" value="${esc(v)}" ${selected.includes(v) ? "checked" : ""}><span>${esc(labelOf(v))}</span></label>`).join("");
 }
 
-function fillForm() {
+function renderSettings() {
+  const signed = Boolean(state.user);
+  $("signInPrompt").hidden = signed || !state.auth?.googleClientId;
+  $("form").hidden = !signed;
+  $("claimBox").hidden = !(signed && !state.auth?.ownerExists && state.auth?.pinConfigured);
+  $("anonHint").innerHTML = signed ? "" : `<div class="banner no">${T().anonHint}</div>`;
   const s = state.settings, o = state.options;
-  if (!s || !o) return;
+  if (!signed || !s || !o) return;
   renderOpts("models", o.models, s.models, (m) => o.modelLabels[m] || m);
   renderOpts("storages", o.storages, s.storages, (v) => v.toUpperCase());
   renderOpts("colors", [...new Set([...BASE_COLORS, ...s.colors])], s.colors, (c) => c);
@@ -497,165 +750,129 @@ function fillForm() {
   $("enabled").checked = s.enabled;
   $("priority").value = s.priority;
   $("repeatHours").value = String(s.repeatHours);
-  $("ntfyTopic").value = "";
-  $("email").value = "";
+  $("ntfyTopic").value = ""; $("email").value = "";
   $("ntfyTopic").placeholder = s.ntfyTopic || T().notSet;
   $("email").placeholder = s.email || T().notSet;
-  $("form").classList.toggle("locked", !state.authorized);
-  $("newPinBox").style.display = !state.authorized && state.storage && !state.pinConfigured ? "" : "none";
-  $("loginBox").style.display = state.authorized || !state.pinConfigured ? "none" : "";
 }
 
 function readForm() {
   const checked = (name) => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((i) => i.value);
   const out = {
-    models: checked("models"),
-    storages: checked("storages"),
-    colors: checked("colors"),
-    zip: $("zip").value.trim(),
-    maxMiles: Number($("maxMiles").value),
-    enabled: $("enabled").checked,
-    priority: $("priority").value,
-    repeatHours: Number($("repeatHours").value),
-    lang,
+    models: checked("models"), storages: checked("storages"), colors: checked("colors"),
+    zip: $("zip").value.trim(), maxMiles: Number($("maxMiles").value), enabled: $("enabled").checked,
+    priority: $("priority").value, repeatHours: Number($("repeatHours").value), lang,
   };
   if ($("ntfyTopic").value.trim()) out.ntfyTopic = $("ntfyTopic").value.trim();
   if ($("email").value.trim()) out.email = $("email").value.trim();
   return out;
 }
 
-function setupWarnings(d) {
-  if (!d) return;
-  const t = T(), w = [];
-  if (!d.storage) w.push(t.warnStorage);
-  else if (!d.pinConfigured && !state.pinConfigured) w.push(t.warnPin);
-  if (d.storage && state.settings && !state.settings.ntfyTopic && !state.settings.ntfyTopicSet) w.push(t.warnTopic);
-  $("setup").innerHTML = w.map((x) => `<div class="banner warn">${x}</div>`).join("");
-}
-
-async function load() {
-  state.pin = store.get("pin");
-  try {
-    const d = await api("GET");
-    state.meta = d;
-    state.settings = d.settings; state.options = d.options; state.authorized = d.authorized; state.status = d.status;
-    state.storage = d.storage; state.pinConfigured = d.pinConfigured;
-    if (d.storage && !d.pinConfigured) $("settingsBox").open = true;
-    setupWarnings(d);
-    fillForm();
-    if (d.status) render(d.status); else liveCheck();
-  } catch (e) {
-    $("setup").innerHTML = `<div class="banner err">${esc(T().loadFailed(errText(e)))}</div>`;
-    liveCheck();
-  }
-}
-
-async function liveCheck() {
-  $("live").disabled = true;
-  $("live").textContent = T().checking;
-  $("status").textContent = "";
-  try {
-    const r = await fetch(`/api/check?t=${Date.now()}`, { cache: "no-store" });
-    const d = await r.json();
-    if (d.error) throw new Error(d.error);
-    render(d);
-  } catch (e) {
-    $("status").textContent = "";
-    const fallback = state.status && !state.status.error;
-    const b = `<div class="banner err">${esc(T().liveFailed(e.message))}${fallback ? esc(T().showingLast) : ""}</div>`;
-    if (fallback) render(state.status, b); else $("banner").innerHTML = b;
-  } finally {
-    $("live").disabled = false;
-    $("live").textContent = T().checkNow;
-    flash($("status"));
-  }
-}
-
-function flash(el) {
-  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
-}
-
-function afterUnlock(d, msg) {
-  store.set("pin", state.pin);
-  state.authorized = true; state.pinConfigured = true; state.settings = d.settings;
-  setupWarnings(state.meta);
-  fillForm();
-  if (msg) { $("saveMsg").className = "msg ok"; $("saveMsg").textContent = msg; }
-}
-
-$("live").addEventListener("click", liveCheck);
-
-document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", async () => {
-  lang = b.dataset.lang;
-  store.set("lang", lang);
-  applyLang();
-  fillForm();
-  setupWarnings(state.meta);
-  if (state.last) render(state.last); else renderCompare();
-  // jezik obavijesti prati jezik stranice
-  if (state.authorized) { try { state.settings = (await api("POST", { action: "save", settings: { lang } })).settings; } catch (e) {} }
-}));
-
-$("login").addEventListener("click", async () => {
-  state.pin = $("pin").value;
-  $("loginMsg").textContent = "";
-  try {
-    try {
-      afterUnlock(await api("POST", { action: "login" }));
-    } catch (e) {
-      if (e.code !== "pin_not_set") throw e;
-      // PIN jos ne postoji: upisani PIN postaje novi PIN
-      if (state.pin.length < 4) throw Object.assign(new Error(T().pinShort), { code: "pin_short" });
-      afterUnlock(await api("POST", { action: "setpin", newPin: state.pin }), T().pinSet);
-    }
-  } catch (e) {
-    $("loginMsg").className = "msg err"; $("loginMsg").textContent = errText(e);
-  }
-});
-
-$("setPin").addEventListener("click", async () => {
-  const m = $("newPinMsg"); m.className = "msg err";
-  const a = $("newPin").value, b = $("newPin2").value;
-  if (a.length < 4) { m.textContent = T().pinShort; return; }
-  if (a !== b) { m.textContent = T().pinMismatch; return; }
-  try {
-    const d = await api("POST", { action: "setpin", newPin: a });
-    state.pin = a;
-    afterUnlock(d, T().pinSet);
-  } catch (e) { m.textContent = errText(e); }
-});
-
 $("save").addEventListener("click", async () => {
   const m = $("saveMsg"); m.className = "msg"; m.textContent = T().saving;
   $("save").disabled = true;
   try {
-    const d = await api("POST", { action: "save", settings: readForm() });
-    state.settings = d.settings;
-    fillForm();
-    setupWarnings(state.meta);
+    const zipBefore = state.settings?.zip;
+    state.settings = (await api("/api/settings", "POST", { action: "save", settings: readForm() })).settings;
+    renderSettings();
     m.className = "msg ok"; m.textContent = T().saved;
-    liveCheck();
-  } catch (e) {
-    m.className = "msg err"; m.textContent = errText(e);
-  } finally {
-    $("save").disabled = false;
-  }
+    if (state.settings.zip !== zipBefore) liveCheck(); else if (state.last) render(state.last);
+  } catch (e) { m.className = "msg err"; m.textContent = errText(e); }
+  finally { $("save").disabled = false; }
 });
 
 $("test").addEventListener("click", async () => {
   const m = $("saveMsg"); m.className = "msg"; m.textContent = T().sending;
   try {
-    state.settings = (await api("POST", { action: "save", settings: readForm() })).settings;
-    fillForm();
-    setupWarnings(state.meta);
-    await api("POST", { action: "test", origin: location.origin });
+    state.settings = (await api("/api/settings", "POST", { action: "save", settings: readForm() })).settings;
+    renderSettings();
+    await api("/api/settings", "POST", { action: "test", origin: location.origin });
     m.className = "msg ok"; m.textContent = T().testSent;
-  } catch (e) {
-    m.className = "msg err"; m.textContent = errText(e);
-  }
+  } catch (e) { m.className = "msg err"; m.textContent = errText(e); }
 });
 
+$("claim").addEventListener("click", async () => {
+  const m = $("claimMsg"); m.className = "msg";
+  try {
+    await api("/api/admin", "POST", { action: "claim", pin: $("claimPin").value });
+    m.className = "msg ok"; m.textContent = T().claimed;
+    await boot();
+  } catch (e) { m.className = "msg err"; m.textContent = errText(e); }
+});
 
+// ---------- admin
+async function loadAdmin() {
+  if (!state.user?.isOwner) return;
+  const t = T();
+  try {
+    const d = await api("/api/admin");
+    const st = d.stats, today = st.daily[st.daily.length - 1] || { views: 0, visitors: 0 };
+    $("kpis").innerHTML = [
+      [t.kTotalViews, st.totalViews], [t.kVisitors, st.uniqueVisitors],
+      [t.kToday, `${today.views} / ${today.visitors}`], [t.kUsers, st.registeredUsers],
+    ].map(([k, v]) => `<div class="kpi"><div class="kv">${esc(v)}</div><div class="kl">${esc(k)}</div></div>`).join("");
+    const max = Math.max(1, ...st.daily.map((x) => x.views));
+    $("chart").innerHTML = st.daily.map((x) => {
+      const label = new Date(x.day + "T12:00:00Z").toLocaleDateString(lang === "bs" ? "bs-BA" : "en-US", { day: "numeric", month: "short" });
+      return `<div class="col" title="${esc(label)}: ${x.views} ${esc(t.views)}, ${x.visitors} ${esc(t.visitors)}">
+        <div class="bars"><div class="b views" style="height:${(x.views / max) * 100}%"></div><div class="b visitors" style="height:${(x.visitors / max) * 100}%"></div></div>
+        <div class="d">${esc(label.replace(/\s.*/, ""))}</div></div>`;
+    }).join("");
+    $("usersTable").innerHTML = d.users.length ? `<div class="tablewrap"><table class="cmp users"><thead><tr>
+      <th>${esc(t.uEmail)}</th><th>${esc(t.uZip)}</th><th>${esc(t.uModels)}</th><th>${esc(t.uNotif)}</th><th>${esc(t.uLast)}</th><th>${esc(t.uSince)}</th></tr></thead><tbody>
+      ${d.users.map((u) => `<tr><td><b>${esc(u.name || "—")}</b>${u.isOwner ? ` <span class="badge">${esc(t.owner)}</span>` : ""}<div class="hint" style="margin:0">${esc(u.email)}</div></td>
+        <td>${esc(u.zip || "—")}</td><td>${esc((u.models || []).map((m) => state.options?.modelLabels?.[m]?.replace("iPhone ", "") || m).join(", ") || "—")}</td>
+        <td>${u.notifications ? `<span class="stock ok">${esc(t.yes)}</span>` : `<span class="stock">${esc(t.no)}</span>`}</td>
+        <td>${esc(fmtDate(u.lastSeen))}</td><td>${esc(fmtDate(u.createdAt))}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="hint">—</p>`;
+    $("adminClientId").value = state.auth?.googleClientId || "";
+  } catch (e) {
+    $("kpis").innerHTML = `<div class="banner err">${esc(errText(e))}</div>`;
+  }
+}
+
+$("saveClientId").addEventListener("click", async () => {
+  const m = $("adminMsg"); m.className = "msg";
+  try {
+    await api("/api/admin", "POST", { action: "clientId", clientId: $("adminClientId").value });
+    m.className = "msg ok"; m.textContent = T().clientSaved; await boot();
+  } catch (e) { m.className = "msg err"; m.textContent = errText(e); }
+});
+
+// ---------- language switch
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", async () => {
+  lang = b.dataset.lang;
+  store.set("lang", lang);
+  applyLang(); renderAccount(); renderSetup(); renderSettings();
+  if (state.last) render(state.last); else renderCompare();
+  if (!$("tab-admin").hidden) loadAdmin();
+  if (state.user) { try { state.settings = (await api("/api/settings", "POST", { action: "save", settings: { lang } })).settings; } catch (e) {} }
+}));
+
+// ---------- visit counter (anonymous random id, once per page load)
+function track() {
+  let vid = store.get("vid");
+  if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)); store.set("vid", vid); }
+  try {
+    fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
+      body: JSON.stringify({ vid, path: "/" }) });
+  } catch (e) {}
+}
+
+// ---------- boot
+async function boot() {
+  try {
+    state.auth = await api("/api/auth");
+    state.user = state.auth.user;
+  } catch (e) { state.auth = { storage: false }; state.user = null; }
+  try {
+    const d = await api("/api/settings");
+    state.options = d.options;
+    state.settings = d.signedIn ? d.settings : null;
+    state.status = d.status;
+  } catch (e) {}
+  renderAccount(); renderSetup(); renderSettings();
+  if (state.status) render(state.status); else liveCheck();
+}
 // ---------- comparison (Apple spec data, iPhone lineup fall 2026)
 const SPEC_MODELS = [
   { key: "18 pro max", name: "iPhone 18 Pro Max" },
@@ -706,7 +923,8 @@ function compareStock() {
   // per model: in-stock configurations & stores, from the last result
   const out = {};
   const storages = {};
-  (state.last?.stores || []).forEach((s) => s.items.forEach((i) => {
+  const f = filters();
+  (state.last?.stores || []).filter((s) => s.distance <= f.maxMiles).forEach((s) => s.items.forEach((i) => {
     (storages[i.model] ||= new Set()).add(i.storage);
     if (!i.available) return;
     const o = (out[i.model] ||= { n: 0, stores: new Set() });
@@ -732,7 +950,7 @@ function renderCompare() {
     const s = [...(storages[key] || [])].filter(Boolean).sort((a, b) => order.indexOf(a) - order.indexOf(b));
     return s.length ? s.map((x) => x.toUpperCase()).join(", ") : "—";
   };
-  const wanted = state.settings?.models || [];
+  const wanted = filters().models || [];
   let rows = SPECS.map((spec) => {
     const vals = cols.map((c) => tr(spec.v[c.i]) ?? (spec.storage ? fmtStorage(c.key) : "—"));
     const same = vals.every((v) => v === vals[0]);
@@ -761,10 +979,13 @@ document.addEventListener("change", (e) => {
   if (e.target.id === "cmpDiff") renderCompare();
 });
 
+
 applyLang();
-renderCompare();
-load();
-setInterval(() => { if (state.status) load(); }, 5 * 60 * 1000);
+showTab(location.hash.slice(1) || "stock");
+track();
+boot();
+setInterval(() => { if (document.visibilityState === "visible") boot(); }, 5 * 60 * 1000);
 </script>
 </body>
 </html>
+

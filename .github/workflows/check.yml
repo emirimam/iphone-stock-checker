@@ -5,10 +5,6 @@ on:
     - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
-      test:
-        description: "Samo posalji probnu poruku"
-        type: boolean
-        default: false
       diag:
         description: "Dijagnostika Apple zahtjeva"
         type: boolean
@@ -40,28 +36,18 @@ jobs:
           key: stock-state-${{ github.run_id }}
           restore-keys: stock-state-
 
-      - name: Probna poruka
-        if: ${{ inputs.test }}
-        run: node scripts/notify.mjs --test
-        env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          ADMIN_PIN: ${{ secrets.ADMIN_PIN }}
-          APP_URL: ${{ vars.APP_URL }}
-
       - name: Dijagnostika
         if: ${{ inputs.diag }}
         run: node scripts/probe.mjs https://iphone-stock-checker-hazel.vercel.app
 
       - name: Provjeri zalihe
-        if: ${{ !inputs.test && !inputs.diag }}
+        if: ${{ !inputs.diag }}
         run: mkdir -p state && node scripts/notify.mjs
         env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          ADMIN_PIN: ${{ secrets.ADMIN_PIN }}
           APP_URL: ${{ vars.APP_URL }}
 
       - name: Sacuvaj stanje
-        if: ${{ !inputs.test && !inputs.diag && always() }}
+        if: ${{ !inputs.diag && always() }}
         uses: actions/cache/save@v4
         with:
           path: state
