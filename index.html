@@ -3,108 +3,375 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>iPhone zalihe 32068</title>
+<title>iPhone zalihe</title>
 <style>
   :root {
     --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
-    --ok: #1f8a3b; --ok-bg: #e6f4ea; --no: #8e8e93; --no-bg: #f0f0f3; --accent: #0066cc; --err: #c0392b;
+    --ok: #1f8a3b; --ok-bg: #e6f4ea; --no: #8e8e93; --no-bg: #f0f0f3; --accent: #0066cc;
+    --err: #c0392b; --warn-bg: #fff6e0; --warn: #8a5a00;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #0b0b0d; --card: #18181b; --text: #f5f5f7; --muted: #a1a1aa; --line: #2a2a30;
-      --ok: #4ade80; --ok-bg: #14301d; --no: #71717a; --no-bg: #222227; --accent: #4da3ff; --err: #f87171; }
+      --ok: #4ade80; --ok-bg: #14301d; --no: #71717a; --no-bg: #222227; --accent: #4da3ff;
+      --err: #f87171; --warn-bg: #2d2410; --warn: #f5c869; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
     font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  main { max-width: 780px; margin: 0 auto; padding: 24px 16px 56px; }
   h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.02em; }
-  .sub { color: var(--muted); margin: 0 0 20px; }
-  .bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
-  input { width: 92px; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line);
-    background: var(--card); color: var(--text); font: inherit; }
+  h2 { font-size: 18px; margin: 28px 0 10px; }
+  h3 { font-size: 15px; margin: 0; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
   button { padding: 9px 16px; border-radius: 10px; border: 0; background: var(--accent); color: #fff;
     font: inherit; font-weight: 600; cursor: pointer; }
-  button:disabled { opacity: .6; cursor: wait; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+  button:disabled { opacity: .55; cursor: wait; }
   .status { color: var(--muted); font-size: 13px; }
-  .banner { padding: 16px; border-radius: 14px; margin-bottom: 18px; font-weight: 600; }
-  .banner.ok { background: var(--ok-bg); color: var(--ok); }
+  .banner { padding: 14px 16px; border-radius: 14px; margin-bottom: 14px; }
+  .banner.ok { background: var(--ok-bg); color: var(--ok); font-weight: 600; }
   .banner.no { background: var(--card); border: 1px solid var(--line); color: var(--muted); }
-  .banner.err { background: var(--card); border: 1px solid var(--err); color: var(--err); font-weight: 500; }
+  .banner.err { background: var(--card); border: 1px solid var(--err); color: var(--err); }
+  .banner.warn { background: var(--warn-bg); color: var(--warn); }
   .banner a { color: inherit; }
-  .store { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
-  .store h2 { font-size: 16px; margin: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
   .meta { color: var(--muted); font-size: 13px; margin: 2px 0 10px; }
   .grid { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { font-size: 12.5px; padding: 5px 9px; border-radius: 999px; background: var(--no-bg); color: var(--no); }
   .chip.ok { background: var(--ok-bg); color: var(--ok); font-weight: 600; }
+  .group { margin-top: 10px; }
+  .group-label { font-size: 12.5px; color: var(--muted); margin-bottom: 5px; }
+  details.settings { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin-top: 28px; }
+  details.settings > summary { padding: 14px 16px; font-weight: 600; cursor: pointer; list-style: none; }
+  details.settings > summary::-webkit-details-marker { display: none; }
+  details.settings > summary::after { content: "▾"; float: right; color: var(--muted); }
+  details.settings[open] > summary::after { content: "▴"; }
+  .sbody { padding: 0 16px 16px; }
+  fieldset { border: 0; padding: 0; margin: 0 0 16px; }
+  legend { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 4px 0 0; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opt { position: relative; }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .opt span { display: inline-block; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line);
+    font-size: 13px; cursor: pointer; user-select: none; text-transform: capitalize; }
+  .opt input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .opt input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  label.f { display: block; font-size: 13px; color: var(--muted); }
+  label.f input, label.f select { display: block; width: 100%; margin-top: 4px; padding: 9px 10px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; }
+  .switch { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+  .switch input { width: 18px; height: 18px; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+  .msg { font-size: 13px; }
+  .msg.ok { color: var(--ok); } .msg.err { color: var(--err); }
+  .locked { opacity: .5; pointer-events: none; }
   footer { color: var(--muted); font-size: 12.5px; margin-top: 24px; }
 </style>
 </head>
 <body>
 <main>
-  <h1>iPhone 18 Pro Max — zalihe</h1>
-  <p class="sub">Apple Store pickup u blizini Middleburga, FL. Zeleno = može se preuzeti.</p>
+  <h1>iPhone zalihe</h1>
+  <p class="sub" id="sub">Apple Store preuzimanje u blizini.</p>
 
   <div class="bar">
-    <label>ZIP <input id="zip" value="32068" inputmode="numeric"></label>
-    <label>Milja <input id="miles" value="60" inputmode="numeric"></label>
-    <button id="go">Provjeri sada</button>
+    <button id="live">Provjeri sada</button>
     <span class="status" id="status"></span>
   </div>
 
-  <div id="out"></div>
+  <div id="setup"></div>
+  <div id="banner"></div>
 
-  <footer>Automatska provjera ide svakih 15 min preko GitHub Actions i šalje push poruku (ntfy) kad se nešto pojavi.
-    Ova stranica se osvježava svakih 5 min dok je otvorena.</footer>
+  <h2>Traženi telefoni</h2>
+  <div id="wanted"><div class="banner no">Učitavam…</div></div>
+
+  <h2>Ostali dostupni telefoni</h2>
+  <div id="others"><div class="banner no">Učitavam…</div></div>
+
+  <details class="settings" id="settingsBox">
+    <summary>Podešavanja i obavijesti</summary>
+    <div class="sbody">
+      <div id="loginBox">
+        <div class="row">
+          <label class="f">PIN za izmjene<input id="pin" type="password" autocomplete="current-password"></label>
+        </div>
+        <div class="actions"><button id="login">Otključaj</button><span class="msg" id="loginMsg"></span></div>
+        <p class="hint">Bez PIN-a podešavanja su samo za pregled.</p>
+      </div>
+
+      <form id="form" class="locked" onsubmit="return false">
+        <fieldset>
+          <legend>Koji telefon tražim</legend>
+          <div class="opts" id="models"></div>
+          <p class="hint">Za ove modele stiže obavijest. Svi ostali se prikazuju pod „Ostali dostupni“.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Memorija</legend>
+          <div class="opts" id="storages"></div>
+          <p class="hint">Ništa označeno = bilo koja.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Boja</legend>
+          <div class="opts" id="colors"></div>
+          <p class="hint">Ništa označeno = bilo koja.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Lokacija</legend>
+          <div class="row">
+            <label class="f">ZIP kod<input id="zip" inputmode="numeric" maxlength="5"></label>
+            <label class="f">Najviše milja<input id="maxMiles" type="number" min="1" max="500"></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Obavijesti</legend>
+          <label class="switch"><input type="checkbox" id="enabled"> Šalji obavijesti</label>
+          <div class="row" style="margin-top:12px">
+            <label class="f">ntfy topic<input id="ntfyTopic" autocomplete="off" spellcheck="false"></label>
+            <label class="f">Email (opcionalno)<input id="email" type="email" autocomplete="email"></label>
+            <label class="f">Prioritet
+              <select id="priority">
+                <option value="min">Minimalan (bez zvuka)</option>
+                <option value="low">Nizak</option>
+                <option value="default">Normalan</option>
+                <option value="high">Visok</option>
+                <option value="urgent">Hitan (zvoni dugo)</option>
+              </select>
+            </label>
+            <label class="f">Ponovi podsjetnik
+              <select id="repeatHours">
+                <option value="0">Samo kad se pojavi novo</option>
+                <option value="1">Svaki sat dok je dostupno</option>
+                <option value="3">Svaka 3 sata</option>
+                <option value="6">Svakih 6 sati</option>
+                <option value="12">Svakih 12 sati</option>
+              </select>
+            </label>
+          </div>
+          <p class="hint">Instaliraj aplikaciju <b>ntfy</b> na mobitel i pretplati se na isti topic. Polja za topic i email
+            ostavi prazna da zadržiš postojeće vrijednosti.</p>
+        </fieldset>
+        <div class="actions">
+          <button id="save">Sačuvaj</button>
+          <button id="test" class="ghost">Pošalji probnu poruku</button>
+          <span class="msg" id="saveMsg"></span>
+        </div>
+      </form>
+    </div>
+  </details>
+
+  <footer>GitHub provjerava zalihe svakih 15 minuta i šalje obavijest za tražene modele. „Provjeri sada“ radi provjeru odmah.</footer>
 </main>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const short = (t) => t.replace(/^iPhone 18 Pro Max\s*/i, "");
+const BASE_COLORS = ["black", "silver", "glacier", "burgundy"];
+let state = { settings: null, options: null, status: null, authorized: false, pin: "" };
 
-try {
-  const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
-  if (saved.zip) $("zip").value = saved.zip;
-  if (saved.miles) $("miles").value = saved.miles;
-} catch (e) {}
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
 
-async function run() {
-  const zip = $("zip").value.trim(), miles = $("miles").value.trim();
-  try { localStorage.setItem("prefs", JSON.stringify({ zip, miles })); } catch (e) {}
-  $("go").disabled = true;
+function ago(iso) {
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (m < 1) return "upravo";
+  if (m < 60) return `prije ${m} min`;
+  const h = Math.floor(m / 60);
+  return `prije ${h} h ${m % 60} min`;
+}
+
+async function api(method, body) {
+  const r = await fetch("/api/settings", {
+    method,
+    headers: { "Content-Type": "application/json", "x-pin": state.pin },
+    body: body ? JSON.stringify({ pin: state.pin, ...body }) : undefined,
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+  return d;
+}
+
+// ---------- prikaz rezultata
+function render(d) {
+  if (!d) return;
+  if (d.error) {
+    $("banner").innerHTML = `<div class="banner err">Zadnja provjera nije uspjela: ${esc(d.error)}</div>`;
+    return;
+  }
+  const src = d.source === "github" ? "automatska provjera" : "provjera uživo";
+  $("status").textContent = `Zadnja ${src}: ${ago(d.checkedAt)} (${new Date(d.checkedAt).toLocaleTimeString("bs-BA", { hour: "2-digit", minute: "2-digit" })})`;
+  $("sub").textContent = `Apple Store preuzimanje do ${d.maxMiles} milja od ZIP ${d.zip}.`;
+
+  const n = d.available.length;
+  $("banner").innerHTML = n
+    ? `<div class="banner ok">Traženo na stanju: ${n} — <a href="${esc(d.buyUrl)}" target="_blank" rel="noopener">naruči online za preuzimanje</a></div>`
+    : `<div class="banner no">Trenutno nijedan traženi model nije dostupan za preuzimanje.</div>`;
+
+  if (!d.stores.length) {
+    const none = `<div class="banner no">Nema Apple Storea u radijusu od ${d.maxMiles} milja. Povećaj udaljenost u podešavanjima.</div>`;
+    $("wanted").innerHTML = none; $("others").innerHTML = none;
+    return;
+  }
+
+  // Trazeni: svi trazeni modeli, zeleno = dostupno
+  $("wanted").innerHTML = d.stores.map((s) => {
+    const items = s.items.filter((i) => i.wanted);
+    if (!items.length) return "";
+    const avail = items.filter((i) => i.available).length;
+    return `<div class="card"><h3>${esc(s.name)}</h3>
+      <div class="meta">${esc(s.city)} · ${s.distance} mi · dostupno ${avail}/${items.length}</div>
+      <div class="grid">${items.map((i) => `<span class="chip ${i.available ? "ok" : ""}" title="${esc(i.quote)}">${esc(i.title.replace(/^iPhone\s*/i, ""))}</span>`).join("")}</div></div>`;
+  }).join("") || `<div class="banner no">Za izabrane filtere Apple ne nudi nijednu konfiguraciju.</div>`;
+
+  // Ostali: samo dostupni, grupisano po modelu
+  const others = d.stores.map((s) => {
+    const items = s.items.filter((i) => !i.wanted && i.available);
+    if (!items.length) return "";
+    const groups = {};
+    for (const i of items) {
+      const label = i.title.replace(/\s+\d+\s*(GB|TB)\b.*$/i, "");
+      (groups[label] ||= []).push(i);
+    }
+    return `<div class="card"><h3>${esc(s.name)}</h3><div class="meta">${esc(s.city)} · ${s.distance} mi</div>` +
+      Object.entries(groups).map(([label, list]) => `<div class="group"><div class="group-label">${esc(label)} · ${list.length}</div>
+        <div class="grid">${list.map((i) => `<span class="chip ok" title="${esc(i.quote)}">${esc([i.storage.toUpperCase(), i.color].filter(Boolean).join(" "))}</span>`).join("")}</div></div>`).join("") +
+      `</div>`;
+  }).join("");
+  $("others").innerHTML = others || `<div class="banner no">Trenutno nema drugih dostupnih modela.</div>`;
+
+  // Dopuni ponudjene boje bojama koje Apple stvarno vraca za trazene modele
+  const seen = new Set(BASE_COLORS);
+  d.stores.forEach((s) => s.items.forEach((i) => { if (i.color && state.settings && state.settings.models.includes(i.model)) seen.add(i.color); }));
+  if (state.options) renderOpts("colors", [...seen], state.settings?.colors || [], (c) => c);
+}
+
+// ---------- podesavanja
+function renderOpts(id, values, selected, labelOf) {
+  $(id).innerHTML = values.map((v) => `<label class="opt"><input type="checkbox" name="${id}" value="${esc(v)}" ${selected.includes(v) ? "checked" : ""}><span>${esc(labelOf(v))}</span></label>`).join("");
+}
+
+function fillForm() {
+  const s = state.settings, o = state.options;
+  renderOpts("models", o.models, s.models, (m) => o.modelLabels[m] || m);
+  renderOpts("storages", o.storages, s.storages, (v) => v.toUpperCase());
+  const colors = [...new Set([...BASE_COLORS, ...s.colors])];
+  renderOpts("colors", colors, s.colors, (c) => c);
+  $("zip").value = s.zip;
+  $("maxMiles").value = s.maxMiles;
+  $("enabled").checked = s.enabled;
+  $("priority").value = s.priority;
+  $("repeatHours").value = String(s.repeatHours);
+  $("ntfyTopic").value = "";
+  $("email").value = "";
+  $("ntfyTopic").placeholder = s.ntfyTopicSet === false ? "nije postavljen" : (state.authorized ? (s.ntfyTopic || "nije postavljen") : (s.ntfyTopic || "nije postavljen"));
+  $("email").placeholder = s.emailSet === false ? "nije postavljen" : (s.email || "nije postavljen");
+  $("form").classList.toggle("locked", !state.authorized);
+  $("loginBox").style.display = state.authorized ? "none" : "";
+}
+
+function readForm() {
+  const checked = (name) => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((i) => i.value);
+  const out = {
+    models: checked("models"),
+    storages: checked("storages"),
+    colors: checked("colors"),
+    zip: $("zip").value.trim(),
+    maxMiles: Number($("maxMiles").value),
+    enabled: $("enabled").checked,
+    priority: $("priority").value,
+    repeatHours: Number($("repeatHours").value),
+  };
+  if ($("ntfyTopic").value.trim()) out.ntfyTopic = $("ntfyTopic").value.trim();
+  if ($("email").value.trim()) out.email = $("email").value.trim();
+  return out;
+}
+
+function setupWarnings(d) {
+  const w = [];
+  if (!d.storage) w.push("Baza nije povezana: u Vercel projektu otvori <b>Storage → Create → Upstash (Redis)</b> i poveži je s projektom, pa uradi Redeploy.");
+  if (!d.pinConfigured) w.push("PIN nije postavljen: u Vercelu dodaj Environment Variable <b>ADMIN_PIN</b> i uradi Redeploy.");
+  if (d.storage && d.settings && d.settings.ntfyTopicSet === false && !d.settings.ntfyTopic) w.push("Obavijesti još nemaju ntfy topic. Postavi ga u Podešavanjima.");
+  $("setup").innerHTML = w.map((x) => `<div class="banner warn">${x}</div>`).join("");
+}
+
+async function load() {
+  state.pin = store.get("pin");
+  try {
+    const d = await api("GET");
+    state.settings = d.settings; state.options = d.options; state.authorized = d.authorized; state.status = d.status;
+    setupWarnings(d);
+    fillForm();
+    if (d.status) render(d.status); else liveCheck();
+  } catch (e) {
+    $("setup").innerHTML = `<div class="banner err">Ne mogu učitati podešavanja: ${esc(e.message)}</div>`;
+    liveCheck();
+  }
+}
+
+async function liveCheck() {
+  $("live").disabled = true;
   $("status").textContent = "Provjeravam…";
   try {
-    const r = await fetch(`/api/check?zip=${encodeURIComponent(zip)}&miles=${encodeURIComponent(miles)}`);
+    const r = await fetch("/api/check");
     const d = await r.json();
     if (d.error) throw new Error(d.error);
     render(d);
-    $("status").textContent = "Zadnja provjera: " + new Date(d.checkedAt).toLocaleTimeString("bs-BA");
   } catch (e) {
-    $("out").innerHTML = `<div class="banner err">Provjera nije uspjela: ${esc(e.message)}</div>`;
     $("status").textContent = "";
+    const fallback = state.status && !state.status.error;
+    $("banner").innerHTML = `<div class="banner err">Provjera uživo nije uspjela (${esc(e.message)}).${fallback ? " Prikazujem zadnju automatsku provjeru." : ""}</div>`;
+    if (fallback) { const b = $("banner").innerHTML; render(state.status); $("banner").innerHTML = b + $("banner").innerHTML; }
   } finally {
-    $("go").disabled = false;
+    $("live").disabled = false;
   }
 }
 
-function render(d) {
-  const n = d.available.length;
-  let html = n
-    ? `<div class="banner ok">Na stanju: ${n} ${n === 1 ? "konfiguracija" : "konfiguracija"} — <a href="${esc(d.buyUrl)}" target="_blank" rel="noopener">naruči za preuzimanje</a></div>`
-    : `<div class="banner no">Trenutno nijedan Pro Max nije dostupan za preuzimanje u ${d.stores.length} ${d.stores.length === 1 ? "dućanu" : "dućana"} do ${d.maxMiles} milja.</div>`;
-  if (!d.stores.length) html += `<div class="banner no">Nema Apple Storea u tom radijusu. Povećaj broj milja.</div>`;
-  for (const s of d.stores) {
-    html += `<div class="store"><h2>${esc(s.name)}</h2>
-      <div class="meta">${esc(s.city)} · ${s.distance} mi</div><div class="grid">` +
-      s.items.map((i) => `<span class="chip ${i.available ? "ok" : ""}" title="${esc(i.quote)}">${esc(short(i.title))}</span>`).join("") +
-      `</div></div>`;
-  }
-  $("out").innerHTML = html;
-}
+$("live").addEventListener("click", liveCheck);
 
-$("go").addEventListener("click", run);
-run();
-setInterval(run, 5 * 60 * 1000);
+$("login").addEventListener("click", async () => {
+  state.pin = $("pin").value;
+  $("loginMsg").textContent = "";
+  try {
+    const d = await api("POST", { action: "login" });
+    store.set("pin", state.pin);
+    state.authorized = true; state.settings = d.settings;
+    fillForm();
+  } catch (e) {
+    $("loginMsg").className = "msg err"; $("loginMsg").textContent = e.message;
+  }
+});
+
+$("save").addEventListener("click", async () => {
+  const m = $("saveMsg"); m.className = "msg"; m.textContent = "Spremam…";
+  $("save").disabled = true;
+  try {
+    const d = await api("POST", { action: "save", settings: readForm() });
+    state.settings = d.settings;
+    fillForm();
+    m.className = "msg ok"; m.textContent = "Sačuvano. Sljedeća automatska provjera koristi nova podešavanja.";
+    liveCheck();
+  } catch (e) {
+    m.className = "msg err"; m.textContent = e.message;
+  } finally {
+    $("save").disabled = false;
+  }
+});
+
+$("test").addEventListener("click", async () => {
+  const m = $("saveMsg"); m.className = "msg"; m.textContent = "Šaljem…";
+  try {
+    await api("POST", { action: "save", settings: readForm() });
+    await api("POST", { action: "test", origin: location.origin });
+    m.className = "msg ok"; m.textContent = "Probna poruka poslana — provjeri mobitel.";
+  } catch (e) {
+    m.className = "msg err"; m.textContent = e.message;
+  }
+});
+
+load();
+setInterval(() => { if (state.status) load(); }, 5 * 60 * 1000);
 </script>
 </body>
 </html>

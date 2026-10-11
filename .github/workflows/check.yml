@@ -41,6 +41,7 @@ jobs:
         run: node scripts/notify.mjs --test
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ADMIN_PIN: ${{ secrets.ADMIN_PIN }}
           APP_URL: ${{ vars.APP_URL }}
 
       - name: Dijagnostika
@@ -52,10 +53,8 @@ jobs:
         run: mkdir -p state && node scripts/notify.mjs
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ADMIN_PIN: ${{ secrets.ADMIN_PIN }}
           APP_URL: ${{ vars.APP_URL }}
-          ZIP: ${{ vars.ZIP }}
-          MAX_MILES: ${{ vars.MAX_MILES }}
-          MODEL: ${{ vars.MODEL }}
 
       - name: Sacuvaj stanje
         if: ${{ !inputs.test && !inputs.diag && always() }}

@@ -3,18 +3,23 @@
 Provjerava da li Apple Storeovi u blizini ZIP-a **32068** imaju iPhone 18 Pro Max za preuzimanje (pickup)
 i šalje push poruku na mobitel kad se nešto pojavi.
 
-- **Web stranica (Vercel):** `index.html` + `api/check.js` – status uživo, dugme „Provjeri sada“.
+- **Web stranica (Vercel):** traženi i ostali dostupni telefoni + sva podešavanja (model, memorija, boja, ZIP, obavijesti) zaštićena PIN-om.
 - **Automatska provjera (GitHub Actions):** svakih 15 min (`.github/workflows/check.yml`), poruka preko [ntfy](https://ntfy.sh)
   samo za *nove* pojave. Vercel Hobby plan dozvoljava cron samo jednom dnevno, pa raspored ide preko GitHub Actions.
 
 ## Podešavanje
 
-1. Instaliraj **ntfy** na mobitel i pretplati se na nasumičan topic (npr. `emir-iphone-7f3k9`).
-2. GitHub → repo → **Settings → Secrets and variables → Actions**:
-   - *Secrets:* `NTFY_TOPIC` = tvoj topic
-   - *Variables (opcionalno):* `APP_URL` (Vercel adresa), `ZIP` (default 32068), `MAX_MILES` (default 60), `MODEL` (default `pro max`)
-3. **Actions → Provjera zaliha → Run workflow** sa „test“ uključenim → treba stići probna poruka.
-4. Vercel → **Add New → Project** → importuj ovaj repo → Deploy (bez dodatnih postavki).
+**Vercel** (projekat `iphone-stock-checker`):
+1. *Storage → Create Database → Upstash (Redis)* (besplatno) → poveži sa projektom.
+2. *Settings → Environment Variables*: `ADMIN_PIN` = PIN po izboru (za izmjene podešavanja).
+3. *Deployments → Redeploy*.
+
+**GitHub** (*Settings → Secrets and variables → Actions*):
+- Secret `ADMIN_PIN` = isti PIN kao na Vercelu
+- Variable `APP_URL` = adresa Vercel stranice, npr. `https://iphone-stock-checker.vercel.app`
+
+Zatim na stranici otvori *Podešavanja i obavijesti*, unesi PIN, izaberi telefon i upiši ntfy topic
+(aplikacija **ntfy** na mobitelu, pretplata na isti topic) → *Pošalji probnu poruku*.
 
 ## Lokalno
 
