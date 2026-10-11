@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy – iPhone Stock</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<style>
+  :root {
+    --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
+    --ok: #1f8a3b; --ok-bg: #e6f4ea; --no: #8e8e93; --no-bg: #f0f0f3; --accent: #0066cc;
+    --err: #c0392b; --warn-bg: #fff6e0; --warn: #8a5a00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b0b0d; --card: #18181b; --text: #f5f5f7; --muted: #a1a1aa; --line: #2a2a30;
+      --ok: #4ade80; --ok-bg: #14301d; --no: #71717a; --no-bg: #222227; --accent: #4da3ff;
+      --err: #f87171; --warn-bg: #2d2410; --warn: #f5c869; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 780px; margin: 0 auto; padding: 24px 16px 56px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  h2 { font-size: 18px; margin: 28px 0 10px; }
+  h3 { font-size: 15px; margin: 0; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  button { padding: 9px 16px; border-radius: 10px; border: 0; background: var(--accent); color: #fff;
+    font: inherit; font-weight: 600; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+  button:disabled { opacity: .55; cursor: wait; }
+  .status { color: var(--muted); font-size: 13px; }
+  .banner { padding: 14px 16px; border-radius: 14px; margin-bottom: 14px; }
+  .banner.ok { background: var(--ok-bg); color: var(--ok); font-weight: 600; }
+  .banner.no { background: var(--card); border: 1px solid var(--line); color: var(--muted); }
+  .banner.err { background: var(--card); border: 1px solid var(--err); color: var(--err); }
+  .banner.warn { background: var(--warn-bg); color: var(--warn); }
+  .banner a { color: inherit; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
+  .meta { color: var(--muted); font-size: 13px; margin: 2px 0 10px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12.5px; padding: 5px 9px; border-radius: 999px; background: var(--no-bg); color: var(--no); }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); font-weight: 600; }
+  .group { margin-top: 10px; }
+  .group-label { font-size: 12.5px; color: var(--muted); margin-bottom: 5px; }
+  details.settings { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin-top: 28px; }
+
+  .doc h1 { display: flex; align-items: center; gap: 10px; }
+  .doc h1 img { border-radius: 9px; }
+  .doc h2 { margin-top: 26px; }
+  .doc p, .doc li { line-height: 1.6; }
+  .doc a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main class="doc">
+<p><a href="/">← iPhone Stock</a></p>
+<h1><img src="/logo.svg" alt="" width="34" height="34">Privacy Policy</h1>
+<p class="sub">Last updated: October 11, 2026</p>
+
+<p>iPhone Stock (“the app”, https://iphone-stock-checker-hazel.vercel.app) is a free tool that notifies you when an iPhone is available for in-store pickup at an Apple Store near a US ZIP code. It is not affiliated with Apple Inc.</p>
+
+<h2>What we collect</h2>
+<ul>
+<li><b>Google account basics</b> – when you sign in with Google we receive your name, email address and profile picture. We do not receive your password or access to any other Google data.</li>
+<li><b>Your settings</b> – the models, storage, colors, ZIP code, distance, ntfy topic, optional notification email, priority and language you choose.</li>
+<li><b>Anonymous visit statistics</b> – a random ID stored in your browser is used to count page views and unique visitors. We do not store IP addresses.</li>
+</ul>
+
+<h2>How we use it</h2>
+<ul>
+<li>To check Apple Store pickup availability for your ZIP code and send you notifications through <a href="https://ntfy.sh" target="_blank" rel="noopener">ntfy.sh</a> (and by email, if you add one).</li>
+<li>To show the app owner aggregate visit statistics and the list of registered users.</li>
+</ul>
+<p>We do not sell your data, show ads or share it with anyone except the services needed to run the app.</p>
+
+<h2>Services we use</h2>
+<ul>
+<li>Google Sign-In (authentication)</li>
+<li>Vercel and Upstash (hosting and database)</li>
+<li>GitHub Actions (scheduled stock checks)</li>
+<li>ntfy.sh (push notifications)</li>
+<li>Apple's public store availability data</li>
+</ul>
+
+<h2>Cookies</h2>
+<p>We use one essential cookie to keep you signed in. Your language choice and the anonymous visitor ID are kept in your browser's local storage.</p>
+
+<h2>Deleting your data</h2>
+<p>To delete your account and settings, email <a href="mailto:lukavacklub1@gmail.com">lukavacklub1@gmail.com</a> from the address you signed in with. You can also revoke the app's access at any time in your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google account permissions</a>.</p>
+
+<h2>Contact</h2>
+<p>Questions: <a href="mailto:lukavacklub1@gmail.com">lukavacklub1@gmail.com</a></p>
+
+</main>
+</body>
+</html>

@@ -108,6 +108,7 @@
   .msg.ok { color: var(--ok); } .msg.err { color: var(--err); }
   .locked { opacity: .5; pointer-events: none; }
   footer { color: var(--muted); font-size: 12.5px; margin-top: 24px; }
+  footer a { color: var(--muted); }
   .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 12px; }
   table.cmp { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13px; }
   table.cmp th, table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
@@ -280,7 +281,7 @@
     </div>
   </section>
 
-  <footer data-i18n="footer"></footer>
+  <footer><span data-i18n="footer"></span><br><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></footer>
 </main>
 <script>
 const I18N = {
