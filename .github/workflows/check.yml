@@ -1,0 +1,57 @@
+name: Provjera zaliha
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Samo posalji probnu poruku"
+        type: boolean
+        default: false
+
+concurrency:
+  group: stock-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ucitaj prethodno stanje
+        uses: actions/cache/restore@v4
+        with:
+          path: state
+          key: stock-state-${{ github.run_id }}
+          restore-keys: stock-state-
+
+      - name: Probna poruka
+        if: ${{ inputs.test }}
+        run: node scripts/notify.mjs --test
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          APP_URL: ${{ vars.APP_URL }}
+
+      - name: Provjeri zalihe
+        if: ${{ !inputs.test }}
+        run: mkdir -p state && node scripts/notify.mjs
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          APP_URL: ${{ vars.APP_URL }}
+          ZIP: ${{ vars.ZIP }}
+          MAX_MILES: ${{ vars.MAX_MILES }}
+          MODEL: ${{ vars.MODEL }}
+
+      - name: Sacuvaj stanje
+        if: ${{ !inputs.test && always() }}
+        uses: actions/cache/save@v4
+        with:
+          path: state
+          key: stock-state-${{ github.run_id }}

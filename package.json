@@ -1,0 +1,14 @@
+{
+  "name": "iphone-stock-checker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Provjera zaliha iPhone 18 Pro Max u Apple Storeovima blizu 32068 (Middleburg, FL)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node scripts/notify.mjs",
+    "test-notify": "node scripts/notify.mjs --test"
+  }
+}

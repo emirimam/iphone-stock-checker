@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iPhone zalihe 32068</title>
+<style>
+  :root {
+    --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
+    --ok: #1f8a3b; --ok-bg: #e6f4ea; --no: #8e8e93; --no-bg: #f0f0f3; --accent: #0066cc; --err: #c0392b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b0b0d; --card: #18181b; --text: #f5f5f7; --muted: #a1a1aa; --line: #2a2a30;
+      --ok: #4ade80; --ok-bg: #14301d; --no: #71717a; --no-bg: #222227; --accent: #4da3ff; --err: #f87171; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+  input { width: 92px; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); font: inherit; }
+  button { padding: 9px 16px; border-radius: 10px; border: 0; background: var(--accent); color: #fff;
+    font: inherit; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .status { color: var(--muted); font-size: 13px; }
+  .banner { padding: 16px; border-radius: 14px; margin-bottom: 18px; font-weight: 600; }
+  .banner.ok { background: var(--ok-bg); color: var(--ok); }
+  .banner.no { background: var(--card); border: 1px solid var(--line); color: var(--muted); }
+  .banner.err { background: var(--card); border: 1px solid var(--err); color: var(--err); font-weight: 500; }
+  .banner a { color: inherit; }
+  .store { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
+  .store h2 { font-size: 16px; margin: 0; }
+  .meta { color: var(--muted); font-size: 13px; margin: 2px 0 10px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12.5px; padding: 5px 9px; border-radius: 999px; background: var(--no-bg); color: var(--no); }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); font-weight: 600; }
+  footer { color: var(--muted); font-size: 12.5px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>iPhone 18 Pro Max — zalihe</h1>
+  <p class="sub">Apple Store pickup u blizini Middleburga, FL. Zeleno = može se preuzeti.</p>
+
+  <div class="bar">
+    <label>ZIP <input id="zip" value="32068" inputmode="numeric"></label>
+    <label>Milja <input id="miles" value="60" inputmode="numeric"></label>
+    <button id="go">Provjeri sada</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div id="out"></div>
+
+  <footer>Automatska provjera ide svakih 15 min preko GitHub Actions i šalje push poruku (ntfy) kad se nešto pojavi.
+    Ova stranica se osvježava svakih 5 min dok je otvorena.</footer>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const short = (t) => t.replace(/^iPhone 18 Pro Max\s*/i, "");
+
+try {
+  const saved = JSON.parse(localStorage.getItem("prefs") || "{}");
+  if (saved.zip) $("zip").value = saved.zip;
+  if (saved.miles) $("miles").value = saved.miles;
+} catch (e) {}
+
+async function run() {
+  const zip = $("zip").value.trim(), miles = $("miles").value.trim();
+  try { localStorage.setItem("prefs", JSON.stringify({ zip, miles })); } catch (e) {}
+  $("go").disabled = true;
+  $("status").textContent = "Provjeravam…";
+  try {
+    const r = await fetch(`/api/check?zip=${encodeURIComponent(zip)}&miles=${encodeURIComponent(miles)}`);
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    render(d);
+    $("status").textContent = "Zadnja provjera: " + new Date(d.checkedAt).toLocaleTimeString("bs-BA");
+  } catch (e) {
+    $("out").innerHTML = `<div class="banner err">Provjera nije uspjela: ${esc(e.message)}</div>`;
+    $("status").textContent = "";
+  } finally {
+    $("go").disabled = false;
+  }
+}
+
+function render(d) {
+  const n = d.available.length;
+  let html = n
+    ? `<div class="banner ok">Na stanju: ${n} ${n === 1 ? "konfiguracija" : "konfiguracija"} — <a href="${esc(d.buyUrl)}" target="_blank" rel="noopener">naruči za preuzimanje</a></div>`
+    : `<div class="banner no">Trenutno nijedan Pro Max nije dostupan za preuzimanje u ${d.stores.length} ${d.stores.length === 1 ? "dućanu" : "dućana"} do ${d.maxMiles} milja.</div>`;
+  if (!d.stores.length) html += `<div class="banner no">Nema Apple Storea u tom radijusu. Povećaj broj milja.</div>`;
+  for (const s of d.stores) {
+    html += `<div class="store"><h2>${esc(s.name)}</h2>
+      <div class="meta">${esc(s.city)} · ${s.distance} mi</div><div class="grid">` +
+      s.items.map((i) => `<span class="chip ${i.available ? "ok" : ""}" title="${esc(i.quote)}">${esc(short(i.title))}</span>`).join("") +
+      `</div></div>`;
+  }
+  $("out").innerHTML = html;
+}
+
+$("go").addEventListener("click", run);
+run();
+setInterval(run, 5 * 60 * 1000);
+</script>
+</body>
+</html>
