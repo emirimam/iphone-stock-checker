@@ -63,6 +63,6 @@ if (fresh.length) {
 }
 
 if (result.productsMatched === 0) {
-  gh("error", "Apple nije vratio nijednu Pro Max konfiguraciju.");
+  gh("error", `Apple nije vratio nijednu Pro Max konfiguraciju. Primjeri naslova: ${result.sampleTitles.join(" | ")}`);
   process.exit(1);
 }

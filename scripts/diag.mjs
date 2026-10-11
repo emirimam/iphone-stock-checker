@@ -41,8 +41,8 @@ out(`prvi partNumber JSON: ${pn}`);
 
 const p = pn || parts[0];
 const tries = {
-  "fulfillment + kolacici": `https://www.apple.com/shop/fulfillment-messages?pl=true&mts.0=regular&parts.0=${encodeURIComponent(p)}&location=32068`,
-  "fulfillment + kolacici + fae": `https://www.apple.com/shop/fulfillment-messages?fae=true&pl=true&mts.0=regular&mts.1=compact&parts.0=${encodeURIComponent(p)}&location=32068`,
+  "fulfillment + kolacici": `https://www.apple.com/shop/retail/pickup-message?pl=true&mts.0=regular&parts.0=${encodeURIComponent(p)}&location=32068`,
+  "fulfillment + kolacici + fae": `https://www.apple.com/shop/retail/pickup-message?fae=true&pl=true&mts.0=regular&mts.1=compact&parts.0=${encodeURIComponent(p)}&location=32068`,
   "pickup-message-recommendations": `https://www.apple.com/shop/pickup-message-recommendations?mts.0=regular&location=32068&product=${encodeURIComponent(p)}`,
   "retail/pickup-message": `https://www.apple.com/shop/retail/pickup-message?parts.0=${encodeURIComponent(p)}&location=32068`,
 };
