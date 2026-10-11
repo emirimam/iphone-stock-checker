@@ -23,4 +23,6 @@ node scripts/notify.mjs --test   # probna poruka
 node scripts/notify.mjs          # jedna provjera
 ```
 
+Koristi Apple endpoint `/shop/retail/pickup-message` (`/shop/fulfillment-messages` vraća 541 sa servera). Za dijagnostiku pokreni workflow sa „diag“.
+
 Ako Apple promijeni stranicu pa skripta ne nađe part brojeve, postavi varijablu `PARTS` (npr. `MXXXXLL/A,MYYYYLL/A`).

@@ -45,7 +45,7 @@ jobs:
 
       - name: Dijagnostika
         if: ${{ inputs.diag }}
-        run: node scripts/titles.mjs
+        run: node scripts/diag.mjs
 
       - name: Provjeri zalihe
         if: ${{ !inputs.test && !inputs.diag }}
