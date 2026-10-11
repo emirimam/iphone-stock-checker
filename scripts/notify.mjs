@@ -24,20 +24,30 @@ if (process.argv.includes("--test")) {
   process.exit(0);
 }
 
-const result = await checkStock({
-  zip: process.env.ZIP,
-  maxMiles: process.env.MAX_MILES,
-  model: process.env.MODEL,
-});
+const gh = (level, msg) => console.log(`::${level}::${String(msg).replace(/\r?\n/g, "%0A")}`);
+
+let result;
+try {
+  result = await checkStock({
+    zip: process.env.ZIP,
+    maxMiles: process.env.MAX_MILES,
+    model: process.env.MODEL,
+  });
+} catch (err) {
+  gh("error", `Provjera nije uspjela: ${err.message}${err.cause ? " | " + err.cause : ""}`);
+  process.exit(1);
+}
 
 console.log(
   `Provjereno ${result.partsChecked} part brojeva, ${result.productsMatched} Pro Max konfiguracija, ` +
     `${result.stores.length} ducana do ${result.maxMiles} mi od ${result.zip}.`
 );
-for (const s of result.stores) {
+const summary = result.stores.map((s) => {
   const n = s.items.filter((i) => i.available).length;
-  console.log(`  ${s.name} (${s.distance} mi): ${n}/${s.items.length} na stanju`);
-}
+  return `${s.name} (${s.distance} mi): ${n}/${s.items.length} na stanju`;
+});
+summary.forEach((l) => console.log("  " + l));
+gh("notice", `${result.partsChecked} part br., ${result.productsMatched} Pro Max, ${result.stores.length} ducana.%0A` + summary.join("%0A"));
 
 const prev = existsSync(STATE) ? JSON.parse(readFileSync(STATE, "utf8")) : [];
 const prevKeys = new Set(prev);
@@ -53,5 +63,6 @@ if (fresh.length) {
 }
 
 if (result.productsMatched === 0) {
-  throw new Error("Apple nije vratio nijednu Pro Max konfiguraciju - provjeri log.");
+  gh("error", "Apple nije vratio nijednu Pro Max konfiguraciju.");
+  process.exit(1);
 }
