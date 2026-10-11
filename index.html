@@ -69,6 +69,18 @@
   .msg.ok { color: var(--ok); } .msg.err { color: var(--err); }
   .locked { opacity: .5; pointer-events: none; }
   footer { color: var(--muted); font-size: 12.5px; margin-top: 24px; }
+  .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 12px; }
+  table.cmp { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13px; }
+  table.cmp th, table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  table.cmp thead th { font-size: 13px; background: var(--bg); position: sticky; top: 0; }
+  table.cmp tbody th { color: var(--muted); font-weight: 500; white-space: nowrap; position: sticky; left: 0; background: var(--card); }
+  table.cmp tr:last-child th, table.cmp tr:last-child td { border-bottom: 0; }
+  table.cmp tr.same td { color: var(--muted); }
+  table.cmp tr.diff td { font-weight: 500; }
+  table.cmp th.want { color: var(--accent); }
+  .tag { font-size: 11px; font-weight: 600; color: var(--accent); margin-top: 2px; }
+  .stock { font-size: 12px; color: var(--no); }
+  .stock.ok { color: var(--ok); font-weight: 600; }
   .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; flex: none; margin-top: 2px; }
   .lang button { background: transparent; color: var(--muted); border: 0; border-radius: 0; padding: 6px 12px; font-weight: 600; font-size: 13px; }
@@ -102,7 +114,16 @@
   <h2 data-i18n="othersTitle"></h2>
   <div id="others"><div class="banner no" data-i18n="loading"></div></div>
 
-  <details class="settings" id="settingsBox">
+  <details class="settings" id="compareBox">
+    <summary data-i18n="cmpTitle"></summary>
+    <div class="sbody">
+      <div class="opts" id="cmpModels"></div>
+      <label class="switch" style="margin:12px 0"><input type="checkbox" id="cmpDiff"> <span data-i18n="cmpOnlyDiff"></span></label>
+      <div id="cmpTable"></div>
+    </div>
+  </details>
+
+  <details class="settings" id="settingsBox" style="margin-top:12px">
     <summary data-i18n="settingsTitle"></summary>
     <div class="sbody">
       <div id="newPinBox" style="display:none">
@@ -225,6 +246,14 @@ const I18N = {
     rep6: "Every 6 hours",
     rep12: "Every 12 hours",
     ntfyHint: "Install the <b>ntfy</b> app on your phone and subscribe to the same topic. Leave topic and email empty to keep the current values. Notifications are sent in the language selected above.",
+    cmpTitle: "Compare models",
+    cmpOnlyDiff: "Show only differences",
+    cmpPick: "Select at least one model.",
+    cmpStockRow: "In stock nearby",
+    cmpInStock: (n, s) => `${n} config${n === 1 ? "" : "s"} in ${s} store${s === 1 ? "" : "s"}`,
+    cmpNone: "none right now",
+    cmpWanted: "watching",
+    cmpNote: "Specs from Apple's iPhone comparison page. Storage for Air/17/17e is taken from the configurations Apple stores currently list. Stock comes from the last check.",
     save: "Save",
     sendTest: "Send test notification",
     footer: "GitHub checks stock every 15 minutes and notifies you about the phones you're looking for. “Check now” runs a check immediately.",
@@ -306,6 +335,14 @@ const I18N = {
     rep6: "Svakih 6 sati",
     rep12: "Svakih 12 sati",
     ntfyHint: "Instaliraj aplikaciju <b>ntfy</b> na mobitel i pretplati se na isti topic. Polja za topic i email ostavi prazna da zadržiš postojeće vrijednosti. Obavijesti stižu na jeziku izabranom gore.",
+    cmpTitle: "Uporedi modele",
+    cmpOnlyDiff: "Prikaži samo razlike",
+    cmpPick: "Izaberi barem jedan model.",
+    cmpStockRow: "Na stanju u blizini",
+    cmpInStock: (n, s) => `${n} konfig. u ${s} ${s === 1 ? "dućanu" : "dućana"}`,
+    cmpNone: "trenutno nema",
+    cmpWanted: "pratim",
+    cmpNote: "Specifikacije sa Appleove stranice za poređenje iPhonea. Memorija za Air/17/17e uzeta je iz konfiguracija koje Apple trenutno nudi u dućanima. Stanje je iz zadnje provjere.",
     save: "Sačuvaj",
     sendTest: "Pošalji probnu poruku",
     footer: "GitHub provjerava zalihe svakih 15 minuta i šalje obavijest za tražene modele. „Provjeri sada“ radi provjeru odmah.",
@@ -441,6 +478,7 @@ function render(d, extraBanner = "") {
   const seen = new Set(BASE_COLORS);
   d.stores.forEach((s) => s.items.forEach((i) => { if (i.color && state.settings && state.settings.models.includes(i.model)) seen.add(i.color); }));
   if (state.options) renderOpts("colors", [...seen], state.settings?.colors || [], (c) => c);
+  renderCompare();
 }
 
 // ---------- settings
@@ -553,7 +591,7 @@ document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("clic
   applyLang();
   fillForm();
   setupWarnings(state.meta);
-  if (state.last) render(state.last);
+  if (state.last) render(state.last); else renderCompare();
   // jezik obavijesti prati jezik stranice
   if (state.authorized) { try { state.settings = (await api("POST", { action: "save", settings: { lang } })).settings; } catch (e) {} }
 }));
@@ -617,7 +655,114 @@ $("test").addEventListener("click", async () => {
   }
 });
 
+
+// ---------- comparison (Apple spec data, iPhone lineup fall 2026)
+const SPEC_MODELS = [
+  { key: "18 pro max", name: "iPhone 18 Pro Max" },
+  { key: "18 pro", name: "iPhone 18 Pro" },
+  { key: "air", name: "iPhone Air" },
+  { key: "17", name: "iPhone 17" },
+  { key: "17e", name: "iPhone 17e" },
+];
+const Y = { en: "Yes", bs: "Da" }, N = { en: "No", bs: "Ne" };
+const SPECS = [
+  { row: { en: "Starting price (US)", bs: "Početna cijena (SAD)" },
+    v: ["$1,299", "$1,199", "$1,099", { en: "$899 (with carrier)", bs: "$899 (uz operatera)" }, "$699"] },
+  { row: { en: "Storage", bs: "Memorija" }, storage: true,
+    v: ["256GB – 2TB", "256GB – 2TB", null, null, null] },
+  { row: { en: "Display", bs: "Ekran" }, v: ["6.9″", "6.3″", "6.5″", "6.3″", "6.1″"] },
+  { row: { en: "ProMotion (up to 120 Hz)", bs: "ProMotion (do 120 Hz)" }, v: [Y, Y, Y, Y, N] },
+  { row: { en: "Always-On display", bs: "Always-On ekran" }, v: [Y, Y, Y, Y, N] },
+  { row: { en: "Dynamic Island", bs: "Dynamic Island" }, v: [Y, Y, Y, Y, { en: "No (notch)", bs: "Ne (zarez)" }] },
+  { row: { en: "Build", bs: "Kućište" },
+    v: [{ en: "Aluminum unibody", bs: "Aluminijski unibody" }, { en: "Aluminum unibody", bs: "Aluminijski unibody" },
+        { en: "Titanium frame", bs: "Titanijski okvir" }, { en: "Aluminum frame", bs: "Aluminijski okvir" }, { en: "Aluminum frame", bs: "Aluminijski okvir" }] },
+  { row: { en: "Camera Control button", bs: "Camera Control dugme" }, v: [Y, Y, Y, Y, N] },
+  { row: { en: "Chip", bs: "Čip" }, v: ["A20 Pro", "A20 Pro", "A19 Pro", "A19", "A19"] },
+  { row: { en: "GPU", bs: "GPU" }, v: ["7-core", "7-core", "5-core", "5-core", "4-core"] },
+  { row: { en: "Rear cameras", bs: "Zadnje kamere" },
+    v: [{ en: "3 × 48MP (Main, Ultra Wide, Telephoto)", bs: "3 × 48MP (glavna, ultra široka, tele)" },
+        { en: "3 × 48MP (Main, Ultra Wide, Telephoto)", bs: "3 × 48MP (glavna, ultra široka, tele)" },
+        { en: "1 × 48MP (Main)", bs: "1 × 48MP (glavna)" },
+        { en: "2 × 48MP (Main, Ultra Wide)", bs: "2 × 48MP (glavna, ultra široka)" },
+        { en: "1 × 48MP (Main)", bs: "1 × 48MP (glavna)" }] },
+  { row: { en: "Optical zoom range", bs: "Optički zoom" }, v: ["0.5× – 8×", "0.5× – 8×", "1× – 2×", "0.5× – 2×", "1× – 2×"] },
+  { row: { en: "Variable aperture", bs: "Promjenjivi otvor blende" }, v: [Y, Y, N, N, N] },
+  { row: { en: "Macro photos", bs: "Makro fotografije" }, v: [Y, Y, N, Y, N] },
+  { row: { en: "Front camera", bs: "Prednja kamera" },
+    v: ["18MP Center Stage", "18MP Center Stage", "18MP Center Stage", "18MP Center Stage", "12MP TrueDepth"] },
+  { row: { en: "Video", bs: "Video" }, v: ["4K 120 fps", "4K 120 fps", "4K 60 fps", "4K 60 fps", "4K 60 fps"] },
+  { row: { en: "Battery (video playback)", bs: "Baterija (video)" },
+    v: [{ en: "up to 45 h", bs: "do 45 h" }, { en: "less than Pro Max", bs: "manje od Pro Max" }, { en: "up to 27 h", bs: "do 27 h" },
+        { en: "up to 30 h", bs: "do 30 h" }, { en: "up to 26 h", bs: "do 26 h" }] },
+  { row: { en: "Colors", bs: "Boje" },
+    v: ["Black, Silver, Glacier, Burgundy", "Black, Silver, Glacier, Burgundy", "Sky Blue, Light Gold, Cloud White, Space Black",
+        "Lavender, Sage, Mist Blue, White, Black", "Soft Pink, White, Black"] },
+];
+const tr = (v) => (v && typeof v === "object" ? v[lang] || v.en : v);
+let compareSel = null;
+
+function compareStock() {
+  // per model: in-stock configurations & stores, from the last result
+  const out = {};
+  const storages = {};
+  (state.last?.stores || []).forEach((s) => s.items.forEach((i) => {
+    (storages[i.model] ||= new Set()).add(i.storage);
+    if (!i.available) return;
+    const o = (out[i.model] ||= { n: 0, stores: new Set() });
+    o.n++; o.stores.add(s.name);
+  }));
+  return { out, storages };
+}
+
+function renderCompare() {
+  const t = T();
+  if (!compareSel) {
+    compareSel = (store.get("compare") || "").split(",").filter(Boolean);
+    if (!compareSel.length) compareSel = SPEC_MODELS.map((m) => m.key);
+  }
+  $("cmpModels").innerHTML = SPEC_MODELS.map((m) =>
+    `<label class="opt"><input type="checkbox" name="cmp" value="${m.key}" ${compareSel.includes(m.key) ? "checked" : ""}><span>${esc(m.name)}</span></label>`).join("");
+  const cols = SPEC_MODELS.map((m, i) => ({ ...m, i })).filter((m) => compareSel.includes(m.key));
+  if (cols.length < 1) { $("cmpTable").innerHTML = `<p class="hint">${esc(t.cmpPick)}</p>`; return; }
+  const onlyDiff = $("cmpDiff").checked;
+  const { out, storages } = compareStock();
+  const order = ["128gb", "256gb", "512gb", "1tb", "2tb"];
+  const fmtStorage = (key) => {
+    const s = [...(storages[key] || [])].filter(Boolean).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    return s.length ? s.map((x) => x.toUpperCase()).join(", ") : "—";
+  };
+  const wanted = state.settings?.models || [];
+  let rows = SPECS.map((spec) => {
+    const vals = cols.map((c) => tr(spec.v[c.i]) ?? (spec.storage ? fmtStorage(c.key) : "—"));
+    const same = vals.every((v) => v === vals[0]);
+    return { spec, vals, same };
+  });
+  if (onlyDiff && cols.length > 1) rows = rows.filter((r) => !r.same);
+  const stockRow = cols.map((c) => {
+    const o = out[c.key];
+    return o ? `<span class="stock ok">${esc(t.cmpInStock(o.n, o.stores.size))}</span>` : `<span class="stock">${esc(t.cmpNone)}</span>`;
+  });
+  $("cmpTable").innerHTML = `<div class="tablewrap"><table class="cmp">
+    <thead><tr><th></th>${cols.map((c) => `<th class="${wanted.includes(c.key) ? "want" : ""}">${esc(c.name)}${wanted.includes(c.key) ? `<div class="tag">${esc(t.cmpWanted)}</div>` : ""}</th>`).join("")}</tr></thead>
+    <tbody>
+      <tr class="stockrow"><th>${esc(t.cmpStockRow)}</th>${stockRow.map((x) => `<td>${x}</td>`).join("")}</tr>
+      ${rows.map((r) => `<tr class="${r.same ? "same" : "diff"}"><th>${esc(tr(r.spec.row))}</th>${r.vals.map((v) => `<td>${esc(v)}</td>`).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    <p class="hint">${esc(t.cmpNote)}</p>`;
+}
+
+document.addEventListener("change", (e) => {
+  if (e.target.name === "cmp") {
+    compareSel = [...document.querySelectorAll('input[name="cmp"]:checked')].map((i) => i.value);
+    store.set("compare", compareSel.join(","));
+    renderCompare();
+  }
+  if (e.target.id === "cmpDiff") renderCompare();
+});
+
 applyLang();
+renderCompare();
 load();
 setInterval(() => { if (state.status) load(); }, 5 * 60 * 1000);
 </script>
