@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2F7BFF"/>
+      <stop offset="1" stop-color="#1B3FB8"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3DDC84"/>
+      <stop offset="1" stop-color="#1FA85A"/>
+    </linearGradient>
+  </defs>
+  <!-- podloga -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- telefon -->
+  <rect x="150" y="92" width="196" height="332" rx="44" fill="#FFFFFF"/>
+  <rect x="166" y="108" width="164" height="300" rx="30" fill="#E8F0FF"/>
+  <rect x="216" y="122" width="64" height="18" rx="9" fill="#1B3FB8"/>
+  <!-- stavke na ekranu (lista zaliha) -->
+  <rect x="186" y="176" width="124" height="20" rx="10" fill="#B9CCF5"/>
+  <rect x="186" y="214" width="96" height="20" rx="10" fill="#B9CCF5"/>
+  <rect x="186" y="252" width="110" height="20" rx="10" fill="#B9CCF5"/>
+  <!-- zelena oznaka: na stanju + lokacija -->
+  <circle cx="338" cy="336" r="96" fill="#1B3FB8"/>
+  <circle cx="338" cy="336" r="82" fill="url(#badge)"/>
+  <path d="M338 284c-22 0-40 17.6-40 39.4 0 28.4 40 64.6 40 64.6s40-36.2 40-64.6C378 301.6 360 284 338 284z" fill="#FFFFFF"/>
+  <path d="M322 322l11 11 21-22" fill="none" stroke="#1FA85A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
