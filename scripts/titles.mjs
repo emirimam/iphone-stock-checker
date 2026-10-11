@@ -12,5 +12,5 @@ for (let i = 0; i < parts.length; i += 10) {
   const q2 = new URLSearchParams(); parts.slice(i, i + 10).forEach((p, k) => q2.set(`parts.${k}`, p)); q2.set("location", "32068");
   const j2 = await (await fetch(`https://www.apple.com/shop/retail/pickup-message?${q2}`, { headers: { "User-Agent": UA, Accept: "application/json" } })).json();
   const s0 = j2.body.stores[0].partsAvailability;
-  console.log(`::notice::${Object.entries(s0).map(([p, v]) => p + "=" + (v.storePickupProductTitle || JSON.stringify(v.messageTypes || {}).slice(0, 80)) + "[" + v.pickupDisplay + "]").join(" ; ")}`);
+  console.log(`::notice::${Object.entries(s0).map(([p, v]) => p + "=" + (v.messageTypes?.regular?.storePickupProductTitle) + "[" + v.pickupDisplay + "]").join(" ; ")}`);
 }
