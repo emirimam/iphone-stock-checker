@@ -6,17 +6,34 @@ import { checkStock } from "../lib/apple.js";
 import { sendNtfy } from "../lib/notify.js";
 import { sanitize, filtersOf } from "../lib/settings.js";
 
-const APP_URL = (process.env.APP_URL || "").replace(/\/+$/, "");
-const PIN = process.env.ADMIN_PIN || "";
+const CANDIDATES = [
+  process.env.APP_URL,
+  "https://iphone-stock-checker.vercel.app",
+  "https://iphone-stock-checker-emirimamovice-5317s-projects.vercel.app",
+].filter(Boolean).map((u) => u.replace(/\/+$/, ""));
 const STATE = "state/state.json";
 
 const gh = (level, msg) => console.log(`::${level}::${String(msg).replace(/\r?\n/g, "%0A")}`);
 
+/** GitHub Actions OIDC token - stranica njime provjerava da zahtjev dolazi iz ovog repoa. */
+async function githubToken() {
+  const url = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
+  const tok = process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+  if (!url || !tok) return "";
+  const res = await fetch(`${url}&audience=iphone-stock-checker`, { headers: { Authorization: `Bearer ${tok}` } });
+  return (await res.json()).value || "";
+}
+
+let APP_URL = "";
+let TOKEN = "";
 async function api(method, body) {
+  const headers = { "Content-Type": "application/json" };
+  if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
+  if (process.env.ADMIN_PIN) headers["x-pin"] = process.env.ADMIN_PIN;
   const res = await fetch(`${APP_URL}/api/settings`, {
     method,
-    headers: { "x-pin": PIN, "Content-Type": "application/json" },
-    body: body ? JSON.stringify({ pin: PIN, ...body }) : undefined,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
     signal: AbortSignal.timeout(20000),
   });
   const data = await res.json().catch(() => ({}));
@@ -25,23 +42,29 @@ async function api(method, body) {
 }
 
 // --- 1) podesavanja
-let settings = sanitize({
-  ntfyTopic: process.env.NTFY_TOPIC || "",
-  zip: process.env.ZIP,
-  maxMiles: process.env.MAX_MILES,
-});
+let settings = sanitize({ ntfyTopic: process.env.NTFY_TOPIC || "" });
 let fromApp = false;
-if (APP_URL && PIN) {
+try {
+  TOKEN = await githubToken();
+} catch (e) {
+  gh("warning", `GitHub token nije dobijen: ${e.message}`);
+}
+for (const url of CANDIDATES) {
+  APP_URL = url;
   try {
     const data = await api("GET");
+    if (!data.options) continue;
+    if (!data.storage) { gh("warning", `${url}: baza nije povezana - koristim zadana podesavanja.`); break; }
     if (data.authorized) {
       settings = sanitize({ ...data.settings, ntfyTopic: data.settings.ntfyTopic || settings.ntfyTopic });
       fromApp = true;
-    } else gh("warning", "PIN nije prihvacen na stranici - koristim zadana podesavanja.");
-  } catch (e) {
-    gh("warning", `Ne mogu procitati podesavanja sa stranice (${e.message}) - koristim zadana.`);
+    } else gh("warning", `${url}: stranica nije prihvatila GitHub token.`);
+    break;
+  } catch {
+    APP_URL = "";
   }
 }
+if (!APP_URL) gh("warning", "Vercel stranica nije pronadjena - koristim zadana podesavanja.");
 
 if (process.argv.includes("--test")) {
   const r = await sendNtfy(settings, "Test obavijesti", "GitHub provjera je podesena. Poruke stizu ovdje.", APP_URL);

@@ -18,6 +18,10 @@ concurrency:
   group: stock-check
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  id-token: write # potpisani token kojim se GitHub prijavljuje na Vercel stranicu
+
 jobs:
   check:
     runs-on: ubuntu-latest

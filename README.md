@@ -9,17 +9,11 @@ i šalje push poruku na mobitel kad se nešto pojavi.
 
 ## Podešavanje
 
-**Vercel** (projekat `iphone-stock-checker`):
-1. *Storage → Create Database → Upstash (Redis)* (besplatno) → poveži sa projektom.
-2. *Settings → Environment Variables*: `ADMIN_PIN` = PIN po izboru (za izmjene podešavanja).
-3. *Deployments → Redeploy*.
+1. Vercel projekat → *Storage* → poveži **Upstash Redis** (besplatno).
+2. Otvori stranicu → *Podešavanja i obavijesti* → postavi PIN → izaberi telefon i upiši ntfy topic → *Pošalji probnu poruku*.
 
-**GitHub** (*Settings → Secrets and variables → Actions*):
-- Secret `ADMIN_PIN` = isti PIN kao na Vercelu
-- Variable `APP_URL` = adresa Vercel stranice, npr. `https://iphone-stock-checker.vercel.app`
-
-Zatim na stranici otvori *Podešavanja i obavijesti*, unesi PIN, izaberi telefon i upiši ntfy topic
-(aplikacija **ntfy** na mobitelu, pretplata na isti topic) → *Pošalji probnu poruku*.
+GitHub Actions se na stranicu prijavljuje GitHubovim potpisanim OIDC tokenom (`id-token: write`),
+pa nikakvi secreti nisu potrebni. Adresu stranice pronalazi sam; po potrebi je postavi kao Actions variable `APP_URL`.
 
 ## Lokalno
 

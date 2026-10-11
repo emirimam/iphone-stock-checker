@@ -93,6 +93,14 @@
   <details class="settings" id="settingsBox">
     <summary>Podešavanja i obavijesti</summary>
     <div class="sbody">
+      <div id="newPinBox" style="display:none">
+        <p class="hint" style="margin:0 0 10px">Prvi put ovdje: izaberi PIN (najmanje 4 znaka). Njime ćeš otključavati podešavanja.</p>
+        <div class="row">
+          <label class="f">Novi PIN<input id="newPin" type="password" autocomplete="new-password"></label>
+          <label class="f">Ponovi PIN<input id="newPin2" type="password" autocomplete="new-password"></label>
+        </div>
+        <div class="actions"><button id="setPin">Postavi PIN</button><span class="msg" id="newPinMsg"></span></div>
+      </div>
       <div id="loginBox">
         <div class="row">
           <label class="f">PIN za izmjene<input id="pin" type="password" autocomplete="current-password"></label>
@@ -268,7 +276,8 @@ function fillForm() {
   $("ntfyTopic").placeholder = s.ntfyTopicSet === false ? "nije postavljen" : (state.authorized ? (s.ntfyTopic || "nije postavljen") : (s.ntfyTopic || "nije postavljen"));
   $("email").placeholder = s.emailSet === false ? "nije postavljen" : (s.email || "nije postavljen");
   $("form").classList.toggle("locked", !state.authorized);
-  $("loginBox").style.display = state.authorized ? "none" : "";
+  $("newPinBox").style.display = !state.authorized && state.storage && !state.pinConfigured ? "" : "none";
+  $("loginBox").style.display = state.authorized || !state.pinConfigured ? "none" : "";
 }
 
 function readForm() {
@@ -290,8 +299,8 @@ function readForm() {
 
 function setupWarnings(d) {
   const w = [];
-  if (!d.storage) w.push("Baza nije povezana: u Vercel projektu otvori <b>Storage → Create → Upstash (Redis)</b> i poveži je s projektom, pa uradi Redeploy.");
-  if (!d.pinConfigured) w.push("PIN nije postavljen: u Vercelu dodaj Environment Variable <b>ADMIN_PIN</b> i uradi Redeploy.");
+  if (!d.storage) w.push("Baza nije vidljiva stranici. Ako si je upravo povezao, u Vercelu otvori <b>Deployments</b>, na vrhu klikni tri tačke <b>⋯ → Redeploy</b>.");
+  else if (!d.pinConfigured) w.push("Postavi PIN: otvori <b>Podešavanja i obavijesti</b> na dnu stranice.");
   if (d.storage && d.settings && d.settings.ntfyTopicSet === false && !d.settings.ntfyTopic) w.push("Obavijesti još nemaju ntfy topic. Postavi ga u Podešavanjima.");
   $("setup").innerHTML = w.map((x) => `<div class="banner warn">${x}</div>`).join("");
 }
@@ -301,6 +310,8 @@ async function load() {
   try {
     const d = await api("GET");
     state.settings = d.settings; state.options = d.options; state.authorized = d.authorized; state.status = d.status;
+    state.storage = d.storage; state.pinConfigured = d.pinConfigured;
+    if (d.storage && !d.pinConfigured) $("settingsBox").open = true;
     setupWarnings(d);
     fillForm();
     if (d.status) render(d.status); else liveCheck();
@@ -341,6 +352,21 @@ $("login").addEventListener("click", async () => {
   } catch (e) {
     $("loginMsg").className = "msg err"; $("loginMsg").textContent = e.message;
   }
+});
+
+$("setPin").addEventListener("click", async () => {
+  const m = $("newPinMsg"); m.className = "msg err";
+  const a = $("newPin").value, b = $("newPin2").value;
+  if (a.length < 4) { m.textContent = "PIN mora imati najmanje 4 znaka."; return; }
+  if (a !== b) { m.textContent = "PIN-ovi se ne poklapaju."; return; }
+  try {
+    const d = await api("POST", { action: "setpin", newPin: a });
+    state.pin = a; store.set("pin", a);
+    state.pinConfigured = true; state.authorized = true; state.settings = d.settings;
+    $("setup").innerHTML = "";
+    fillForm();
+    $("saveMsg").className = "msg ok"; $("saveMsg").textContent = "PIN postavljen. Sad izaberi telefon i upiši ntfy topic.";
+  } catch (e) { m.textContent = e.message; }
 });
 
 $("save").addEventListener("click", async () => {
