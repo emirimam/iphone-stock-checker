@@ -11,7 +11,7 @@ import {
   setPin,
 } from "../lib/settings.js";
 import { MODELS } from "../lib/apple.js";
-import { sendNtfy } from "../lib/notify.js";
+import { sendNtfy, testMessage } from "../lib/notify.js";
 
 const options = () => ({ ...OPTIONS, modelLabels: Object.fromEntries(MODELS.map((m) => [m.key, m.label])) });
 
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (req.method !== "POST") return res.status(405).json({ error: "Metoda nije dozvoljena" });
+    if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
     const body = req.body || {};
     const action = body.action || "save";
 
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     }
 
     const auth = await authorize(req);
-    if (!auth.ok) return res.status(401).json({ error: auth.reason });
+    if (!auth.ok) return res.status(401).json({ error: auth.reason, code: auth.code });
 
     if (action === "login") return res.status(200).json({ ok: true, settings: await loadSettings() });
 
@@ -54,23 +54,21 @@ export default async function handler(req, res) {
 
     if (action === "test") {
       const s = await loadSettings();
-      const r = await sendNtfy(
-        s,
-        "Test obavijesti",
-        `Obavijesti rade. Pratim: ${s.models.join(", ")} kod ZIP ${s.zip} (do ${s.maxMiles} mi).`,
-        body.origin || ""
-      );
+      if (!s.ntfyTopic) return res.status(400).json({ error: "No ntfy topic set.", code: "no_topic" });
+      const m = testMessage(s);
+      const r = await sendNtfy(s, m.title, m.body, body.origin || "");
       return res.status(r.sent ? 200 : 400).json({ ok: r.sent, ...r, error: r.sent ? undefined : r.reason });
     }
 
     if (action === "status") {
-      if (auth.who !== "github" && auth.who !== "pin") return res.status(403).json({ error: "Zabranjeno" });
+      if (auth.who !== "github" && auth.who !== "pin") return res.status(403).json({ error: "Forbidden" });
       await saveStatus(body.status || null);
       return res.status(200).json({ ok: true });
     }
 
-    return res.status(400).json({ error: `Nepoznata akcija: ${action}` });
+    return res.status(400).json({ error: `Unknown action: ${action}` });
   } catch (err) {
-    return res.status(500).json({ error: String(err.message || err) });
+    const status = err.code && err.code.startsWith("pin_") ? 400 : 500;
+    return res.status(status).json({ error: String(err.message || err), code: err.code });
   }
 }

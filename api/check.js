@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       maxMiles: q.miles || s?.maxMiles || 60,
       filters: s && !q.models ? filtersOf(s) : filters,
     });
-    res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=60");
+    res.setHeader("Cache-Control", "no-store");
     res.status(200).json({ source: "live", ...result });
   } catch (err) {
     res.status(502).json({ error: String(err.message || err), checkedAt: new Date().toISOString() });

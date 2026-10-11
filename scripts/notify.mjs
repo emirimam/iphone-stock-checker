@@ -3,7 +3,7 @@
 // 4) vrati rezultat na stranicu da se prikaze kao "zadnja automatska provjera".
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { checkStock } from "../lib/apple.js";
-import { sendNtfy } from "../lib/notify.js";
+import { sendNtfy, t } from "../lib/notify.js";
 import { sanitize, filtersOf } from "../lib/settings.js";
 
 const CANDIDATES = [
@@ -66,7 +66,7 @@ for (const url of CANDIDATES) {
 if (!APP_URL) gh("warning", "Vercel stranica nije pronadjena - koristim zadana podesavanja.");
 
 if (process.argv.includes("--test")) {
-  const r = await sendNtfy(settings, "Test obavijesti", "GitHub provjera je podesena. Poruke stizu ovdje.", APP_URL);
+  const r = await sendNtfy(settings, t(settings.lang).testTitle, t(settings.lang).githubTest, APP_URL);
   gh(r.sent ? "notice" : "error", `Probna poruka: ${r.sent ? "poslana" : r.reason}`);
   process.exit(r.sent ? 0 : 1);
 }
@@ -99,7 +99,7 @@ if (!settings.enabled) {
   notified = "obavijesti iskljucene";
 } else if (toSend.length) {
   const lines = toSend.map((a) => `${a.title} - ${a.store} (${a.distance} mi) ${a.quote}`.trim());
-  const r = await sendNtfy(settings, "iPhone na stanju!", lines.join("\n"), APP_URL || result.buyUrl);
+  const r = await sendNtfy(settings, t(settings.lang).stockTitle, lines.join("\n"), APP_URL || result.buyUrl);
   notified = r.sent ? `poslano (${toSend.length})` : `NIJE poslano: ${r.reason}`;
   gh(r.sent ? "notice" : "error", `Obavijest ${notified}:%0A${lines.join("%0A")}`);
 } else {
