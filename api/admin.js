@@ -1,6 +1,6 @@
 // Vlasnik: statistika posjeta i korisnici. Takodje: prvo postavljanje PIN-a, Google Client ID, preuzimanje vlasnistva.
 import { stats, allUsers, claimOwner, setGoogleClientId, setPin, checkPin, pinConfigured, ownerSub, cronKey } from "../lib/db.js";
-import { lastRun, runJob } from "../lib/job.js";
+import { lastRun, runJob, alertHistory } from "../lib/job.js";
 import { currentUser, readBody, sendError } from "../lib/session.js";
 
 export default async function handler(req, res) {
@@ -10,12 +10,14 @@ export default async function handler(req, res) {
 
     if (req.method === "GET") {
       if (!me?.isOwner) return res.status(403).json({ error: "Owner only.", code: "owner_only" });
-      const [s, users, key, last] = await Promise.all([stats(30), allUsers(), cronKey(), lastRun()]);
+      const [s, users, key, last, alerts] = await Promise.all([stats(30), allUsers(), cronKey(), lastRun(), alertHistory(50)]);
+      const emailOf = Object.fromEntries(users.map((u) => [u.sub, u.profile.email || u.profile.name || u.sub.slice(-4)]));
       const host = req.headers["x-forwarded-host"] || req.headers.host || "iphone-stock-checker-hazel.vercel.app";
       return res.status(200).json({
         stats: s,
         cronUrl: `https://${host}/api/cron?key=${key}`,
         lastRun: last,
+        alerts: alerts.map((a) => ({ ...a, user: a.user === "legacy" ? "legacy" : emailOf[a.user] || a.user.slice(-4) })),
         users: users
           .map((u) => ({
             email: u.profile.email || "",

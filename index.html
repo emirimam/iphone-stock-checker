@@ -273,6 +273,10 @@
       <div class="actions"><button id="copyCron" class="ghost" data-i18n="copy"></button></div>
     </div>
     <div class="card">
+      <h3 data-i18n="alertsTitle"></h3>
+      <div id="alertsTable" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
       <h3 data-i18n="adminDaily"></h3>
       <div class="chart" id="chart"></div>
       <div class="legend"><span class="sw views"></span><span data-i18n="views"></span><span class="sw visitors"></span><span data-i18n="visitors"></span></div>
@@ -338,6 +342,10 @@ const I18N = {
     pinShort: "PIN must be at least 4 characters.", pinMismatch: "PINs don't match.",
     saveClientId: "Save Client ID", clientSaved: "Saved. Reloading…",
     warnStorage: "The page can't see the database. In Vercel open <b>Deployments</b> and click <b>⋯ → Redeploy</b> on the latest one.",
+    alertsTitle: "Sent notifications",
+    noAlerts: "No notifications sent yet.",
+    aTime: "Time", aUser: "User", aEvent: "Event", aItem: "Phone · store",
+    evIn: "In stock", evGone: (m) => `Gone after ~${m} min`,
     cronTitle: "Automatic checks",
     runNow: "Run check now",
     running: "Checking…",
@@ -457,6 +465,10 @@ const I18N = {
     pinShort: "PIN mora imati najmanje 4 znaka.", pinMismatch: "PIN-ovi se ne poklapaju.",
     saveClientId: "Sačuvaj Client ID", clientSaved: "Sačuvano. Učitavam ponovo…",
     warnStorage: "Baza nije vidljiva stranici. U Vercelu otvori <b>Deployments</b> i na zadnjem klikni <b>⋯ → Redeploy</b>.",
+    alertsTitle: "Poslane obavijesti",
+    noAlerts: "Još nije poslana nijedna obavijest.",
+    aTime: "Vrijeme", aUser: "Korisnik", aEvent: "Događaj", aItem: "Telefon · dućan",
+    evIn: "Na stanju", evGone: (m) => `Nestalo nakon ~${m} min`,
     cronTitle: "Automatske provjere",
     runNow: "Pokreni provjeru sada",
     running: "Provjeravam…",
@@ -860,6 +872,13 @@ async function loadAdmin() {
       </tbody></table></div>` : `<p class="hint">—</p>`;
     $("adminClientId").value = state.auth?.googleClientId || "";
     $("cronUrl").value = d.cronUrl || "";
+    const al = d.alerts || [];
+    $("alertsTable").innerHTML = al.length ? `<div class="tablewrap"><table class="cmp users"><thead><tr>
+      <th>${esc(t.aTime)}</th><th>${esc(t.aUser)}</th><th>${esc(t.aEvent)}</th><th>${esc(t.aItem)}</th></tr></thead><tbody>
+      ${al.map((a) => `<tr><td>${esc(fmtDate(a.at))}</td><td>${esc(a.user)}</td>
+        <td>${a.type === "gone" ? `<span class="stock">${esc(t.evGone(a.mins))}</span>` : `<span class="stock ok">${esc(t.evIn)}</span>`}</td>
+        <td>${esc(a.title)} · ${esc(a.store)}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="hint">${esc(t.noAlerts)}</p>`;
     renderCron(d.lastRun);
   } catch (e) {
     $("kpis").innerHTML = `<div class="banner err">${esc(errText(e))}</div>`;
