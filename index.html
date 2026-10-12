@@ -56,6 +56,11 @@
   .tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
   h1.brand { display: flex; align-items: center; gap: 10px; }
   h1.brand img { border-radius: 9px; flex: none; }
+  .locbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin: 0 0 14px; }
+  .locbar label.f { width: 130px; }
+  .locbar button { height: 40px; }
+  .phimg { display: block; width: 100%; max-width: 110px; height: 120px; object-fit: contain; margin: 0 0 8px; }
+  .credit { font-size: 11.5px; color: var(--muted); }
   .topright { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
   .me { display: flex; align-items: center; gap: 8px; font-size: 13px; }
   .me img { width: 26px; height: 26px; border-radius: 50%; }
@@ -161,6 +166,12 @@
       <button id="live" data-i18n="checkNow"></button>
       <span class="status" id="status"></span>
     </div>
+    <form class="locbar" id="locBar" onsubmit="return false">
+      <label class="f"><span data-i18n="zip"></span><input id="locZip" inputmode="numeric" maxlength="5" autocomplete="postal-code"></label>
+      <label class="f"><span data-i18n="maxMiles"></span><input id="locMiles" type="number" min="1" max="500" inputmode="numeric"></label>
+      <button id="locApply" data-i18n="locApply"></button>
+      <span class="msg" id="locMsg"></span>
+    </form>
     <div id="anonHint"></div>
     <div id="banner"></div>
     <h2 data-i18n="wantedTitle"></h2>
@@ -305,7 +316,8 @@ const I18N = {
     signIn: "Sign in", signOut: "Sign out", owner: "owner",
     checkNow: "Check now", checking: "Checking…", loading: "Loading…",
     wantedTitle: "Phones I'm looking for", othersTitle: "Other phones in stock",
-    anonHint: "You're viewing the default search (iPhone 18 Pro Max near ZIP 32068). <b>Sign in with Google</b> in Settings to pick your own phone, location and notifications.",
+    anonHint: "Showing iPhone 18 Pro Max. <b>Sign in with Google</b> in Settings to choose your phone, storage and color and get notifications.",
+    locApply: "Show stores", locBadZip: "Enter a 5-digit US ZIP code.", locBadMiles: "Distance must be 1–500 miles.",
     signInTitle: "Sign in to set up your alerts",
     signInText: "Each account has its own phone, location and notifications. We only store your name and email from Google.",
     whichPhone: "Which phone I'm looking for",
@@ -418,6 +430,7 @@ const I18N = {
     cmpStockRow: "In stock nearby",
     cmpInStock: (n, s) => `${n} config${n === 1 ? "" : "s"} in ${s} store${s === 1 ? "" : "s"}`,
     cmpNone: "none right now", cmpWanted: "watching",
+    cmpImgCredit: "Product images: Apple. iPhone 18 Pro and Pro Max share one image (the larger phone is the Pro Max).",
     cmpNote: "Specs from Apple's iPhone comparison page. Storage for Air/17/17e is taken from the configurations Apple stores currently list. Stock comes from the last check.",
   },
   bs: {
@@ -428,7 +441,8 @@ const I18N = {
     signIn: "Prijava", signOut: "Odjava", owner: "vlasnik",
     checkNow: "Provjeri sada", checking: "Provjeravam…", loading: "Učitavam…",
     wantedTitle: "Traženi telefoni", othersTitle: "Ostali dostupni telefoni",
-    anonHint: "Gledaš zadanu pretragu (iPhone 18 Pro Max kod ZIP 32068). <b>Prijavi se Googleom</b> u Podešavanjima da izabereš svoj telefon, lokaciju i obavijesti.",
+    anonHint: "Prikazujem iPhone 18 Pro Max. <b>Prijavi se Googleom</b> u Podešavanjima da izabereš telefon, memoriju i boju i dobijaš obavijesti.",
+    locApply: "Prikaži dućane", locBadZip: "Upiši američki ZIP od 5 cifara.", locBadMiles: "Udaljenost mora biti 1–500 milja.",
     signInTitle: "Prijavi se da podesiš obavijesti",
     signInText: "Svaki nalog ima svoj telefon, lokaciju i obavijesti. Od Googlea čuvamo samo ime i email.",
     whichPhone: "Koji telefon tražim",
@@ -541,6 +555,7 @@ const I18N = {
     cmpStockRow: "Na stanju u blizini",
     cmpInStock: (n, s) => `${n} konfig. u ${s} ${s === 1 ? "dućanu" : "dućana"}`,
     cmpNone: "trenutno nema", cmpWanted: "pratim",
+    cmpImgCredit: "Slike proizvoda: Apple. iPhone 18 Pro i Pro Max dijele jednu sliku (veći telefon je Pro Max).",
     cmpNote: "Specifikacije sa Appleove stranice za poređenje iPhonea. Memorija za Air/17/17e uzeta je iz konfiguracija koje Apple trenutno nudi u dućanima. Stanje je iz zadnje provjere.",
   },
 };
@@ -557,7 +572,38 @@ let state = { auth: null, user: null, settings: null, options: null, status: nul
 let lang = store.get("lang") || "en";
 const T = () => I18N[lang] || I18N.en;
 const errText = (e) => (e.code && T().err[e.code]) || e.message;
-const filters = () => state.settings || DEFAULTS;
+function anonLoc() {
+  try { const v = JSON.parse(store.get("loc") || "{}"); return v && typeof v === "object" ? v : {}; } catch (e) { return {}; }
+}
+const filters = () => state.settings || { ...DEFAULTS, ...anonLoc() };
+
+function fillLocBar() {
+  const f = filters();
+  if (document.activeElement !== $("locZip")) $("locZip").value = f.zip;
+  if (document.activeElement !== $("locMiles")) $("locMiles").value = f.maxMiles;
+}
+
+$("locApply").addEventListener("click", async () => {
+  const m = $("locMsg"); m.className = "msg err"; m.textContent = "";
+  const zip = $("locZip").value.trim(), miles = Number($("locMiles").value);
+  if (!/^\d{5}$/.test(zip)) { m.textContent = T().locBadZip; return; }
+  if (!(miles >= 1 && miles <= 500)) { m.textContent = T().locBadMiles; return; }
+  const zipChanged = zip !== filters().zip;
+  try {
+    if (state.user) {
+      state.settings = (await api("/api/settings", "POST", { action: "save", settings: { zip, maxMiles: Math.round(miles) } })).settings;
+      renderSettings();
+    } else {
+      store.set("loc", JSON.stringify({ zip, maxMiles: Math.round(miles) }));
+    }
+  } catch (e) { m.textContent = errText(e); return; }
+  if (zipChanged) {
+    state.last = null; state.status = null;
+    $("wanted").innerHTML = $("others").innerHTML = `<div class="banner no">${esc(T().loading)}</div>`;
+    try { const d = await api(`/api/settings?zip=${zip}`); state.status = d.status; } catch (e) {}
+    if (state.status) render(state.status); else liveCheck();
+  } else if (state.last) render(state.last);
+});
 
 async function api(path, method = "GET", body) {
   const r = await fetch(path, {
@@ -781,6 +827,7 @@ function renderOpts(id, values, selected, labelOf) {
 }
 
 function renderSettings() {
+  fillLocBar();
   const signed = Boolean(state.user);
   $("signInPrompt").hidden = signed || !state.auth?.googleClientId;
   $("form").hidden = !signed;
@@ -945,7 +992,7 @@ async function boot() {
     state.user = state.auth.user;
   } catch (e) { state.auth = { storage: false }; state.user = null; }
   try {
-    const d = await api("/api/settings");
+    const d = await api(`/api/settings?zip=${state.user ? "" : anonLoc().zip || ""}`);
     state.options = d.options;
     state.settings = d.signedIn ? d.settings : null;
     state.status = d.status;
@@ -954,13 +1001,15 @@ async function boot() {
   if (state.status) render(state.status); else liveCheck();
 }
 // ---------- comparison (Apple spec data, iPhone lineup fall 2026)
+const APPLE_IMG = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/";
 const SPEC_MODELS = [
-  { key: "18 pro max", name: "iPhone 18 Pro Max" },
-  { key: "18 pro", name: "iPhone 18 Pro" },
-  { key: "air", name: "iPhone Air" },
-  { key: "17", name: "iPhone 17" },
-  { key: "17e", name: "iPhone 17e" },
+  { key: "18 pro max", name: "iPhone 18 Pro Max", img: "iphone-compare-iphone-18-pro-202609" },
+  { key: "18 pro", name: "iPhone 18 Pro", img: "iphone-compare-iphone-18-pro-202609" },
+  { key: "air", name: "iPhone Air", img: "iphone-compare-iphone-air-202609" },
+  { key: "17", name: "iPhone 17", img: "iphone-compare-iphone-17-202609" },
+  { key: "17e", name: "iPhone 17e", img: "iphone-compare-iphone-17e-202609" },
 ];
+const imgUrl = (m) => `${APPLE_IMG}${m.img}?wid=240&hei=308&fmt=png-alpha`;
 const Y = { en: "Yes", bs: "Da" }, N = { en: "No", bs: "Ne" };
 const SPECS = [
   { row: { en: "Starting price (US)", bs: "Početna cijena (SAD)" },
@@ -1042,12 +1091,12 @@ function renderCompare() {
     return o ? `<span class="stock ok">${esc(t.cmpInStock(o.n, o.stores.size))}</span>` : `<span class="stock">${esc(t.cmpNone)}</span>`;
   });
   $("cmpTable").innerHTML = `<div class="tablewrap"><table class="cmp">
-    <thead><tr><th></th>${cols.map((c) => `<th class="${wanted.includes(c.key) ? "want" : ""}">${esc(c.name)}${wanted.includes(c.key) ? `<div class="tag">${esc(t.cmpWanted)}</div>` : ""}</th>`).join("")}</tr></thead>
+    <thead><tr><th></th>${cols.map((c) => `<th class="${wanted.includes(c.key) ? "want" : ""}"><img class="phimg" src="${imgUrl(c)}" alt="${esc(c.name)}" loading="lazy" width="110" height="120" onerror="this.remove()">${esc(c.name)}${wanted.includes(c.key) ? `<div class="tag">${esc(t.cmpWanted)}</div>` : ""}</th>`).join("")}</tr></thead>
     <tbody>
       <tr class="stockrow"><th>${esc(t.cmpStockRow)}</th>${stockRow.map((x) => `<td>${x}</td>`).join("")}</tr>
       ${rows.map((r) => `<tr class="${r.same ? "same" : "diff"}"><th>${esc(tr(r.spec.row))}</th>${r.vals.map((v) => `<td>${esc(v)}</td>`).join("")}</tr>`).join("")}
     </tbody></table></div>
-    <p class="hint">${esc(t.cmpNote)}</p>`;
+    <p class="hint">${esc(t.cmpNote)} <span class="credit">${esc(t.cmpImgCredit)}</span></p>`;
 }
 
 document.addEventListener("change", (e) => {
