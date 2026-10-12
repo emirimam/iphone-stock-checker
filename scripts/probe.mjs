@@ -1,9 +1,12 @@
-const u = process.argv[2] || "https://iphone-stock-checker-hazel.vercel.app";
-for (const p of ["/api/auth", "/api/settings", "/"]) {
-  const r = await fetch(u + p); const t = await r.text();
-  let info = t.slice(0, 120).replace(/\s+/g, " ");
-  try { const j = JSON.parse(t); info = p === "/api/auth" ? `storage=${j.storage} clientId=${!!j.googleClientId} pin=${j.pinConfigured} owner=${j.ownerExists} user=${j.user}` : `signedIn=${j.signedIn} status=${j.status?.source} ${j.status?.zip} stores=${j.status?.stores?.length}`; } catch {}
-  console.log(`::notice::[${r.status}] ${p} ${info}`);
+const B = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/";
+const imgs = {
+  pro: "iphone-compare-iphone-18-pro-202609?wid=400&hei=512&fmt=png-alpha",
+  air: "iphone-compare-iphone-air-202609?wid=400&hei=512&fmt=png-alpha",
+  i17: "iphone-compare-iphone-17-202609?wid=400&hei=512&fmt=png-alpha",
+  i17e: "iphone-compare-iphone-17e-202609?wid=400&hei=512&fmt=png-alpha",
+};
+for (const [k, p] of Object.entries(imgs)) {
+  const r = await fetch(B + p, { headers: { Referer: "https://iphone-stock-checker-hazel.vercel.app/" } });
+  const b = await r.arrayBuffer();
+  console.log(`::notice::${k} [${r.status}] ${r.headers.get("content-type")} ${b.byteLength} B, CORP=${r.headers.get("cross-origin-resource-policy")}`);
 }
-const t = await fetch(u + "/api/track", { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" }, body: "{}" });
-console.log(`::notice::[${t.status}] /api/track (test posjeta se ne broji jer je server)`);
