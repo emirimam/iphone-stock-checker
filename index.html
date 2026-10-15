@@ -3,13 +3,143 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>iPhone Stock</title>
-<meta name="description" content="Get notified when an iPhone is available for pickup at an Apple Store near you.">
+<title>iPhone 18 Pro Max Stock Checker – Apple Store Pickup Alerts</title>
+<meta name="description" content="Free alerts when iPhone 18 Pro Max, 18 Pro, Air or 17 is ready for pickup at an Apple Store near your ZIP. Choose model, storage, color and distance.">
+<link rel="canonical" href="https://iphone-stock-checker-hazel.vercel.app/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Emir Imamovic">
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta property="og:image" content="/logo-512.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="iPhone Stock">
+<meta property="og:title" content="iPhone 18 Pro Max Stock Checker – Apple Store Pickup Alerts">
+<meta property="og:description" content="Free alerts when iPhone 18 Pro Max, 18 Pro, Air or 17 is ready for pickup at an Apple Store near your ZIP. Choose model, storage, color and distance.">
+<meta property="og:url" content="https://iphone-stock-checker-hazel.vercel.app/">
+<meta property="og:image" content="https://iphone-stock-checker-hazel.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="iPhone Stock – Apple Store pickup alerts">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="iPhone 18 Pro Max Stock Checker – Apple Store Pickup Alerts">
+<meta name="twitter:description" content="Free alerts when iPhone 18 Pro Max, 18 Pro, Air or 17 is ready for pickup at an Apple Store near your ZIP. Choose model, storage, color and distance.">
+<meta name="twitter:image" content="https://iphone-stock-checker-hazel.vercel.app/og-image.png">
 <meta name="theme-color" content="#1B3FB8">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebSite",
+   "@id": "https://iphone-stock-checker-hazel.vercel.app/#website",
+   "url": "https://iphone-stock-checker-hazel.vercel.app/",
+   "name": "iPhone Stock",
+   "inLanguage": "en-US"
+  },
+  {
+   "@type": "WebApplication",
+   "@id": "https://iphone-stock-checker-hazel.vercel.app/#app",
+   "name": "iPhone Stock Checker",
+   "url": "https://iphone-stock-checker-hazel.vercel.app/",
+   "description": "Free alerts when iPhone 18 Pro Max, 18 Pro, Air, 17 or 17e is available for in-store pickup at an Apple Store near your US ZIP code.",
+   "applicationCategory": "UtilitiesApplication",
+   "operatingSystem": "Any (web browser)",
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+   },
+   "image": "https://iphone-stock-checker-hazel.vercel.app/og-image.png",
+   "isPartOf": {
+    "@id": "https://iphone-stock-checker-hazel.vercel.app/#website"
+   },
+   "author": {
+    "@type": "Person",
+    "name": "Emir Imamovic"
+   },
+   "featureList": [
+    "Apple Store pickup availability by ZIP code",
+    "Push and email alerts",
+    "Filter by model, storage, color and distance",
+    "iPhone model comparison"
+   ]
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://iphone-stock-checker-hazel.vercel.app/#faq",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "What does iPhone Stock do?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "It checks Apple Store in-store pickup availability for the iPhone you want near your US ZIP code and sends you a push notification (or email) the moment it shows up, so you don't have to keep refreshing apple.com."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Which iPhones can I track?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "iPhone 18 Pro Max, iPhone 18 Pro, iPhone Air, iPhone 17 and iPhone 17e — every storage size and color Apple sells for pickup."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Is it free?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. It is free, has no ads and you only need a Google account to save your alerts."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "How often is stock checked?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Every few minutes, around the clock. You can also press “Check now” for an instant check."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "How do I get notified?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Install the free ntfy app, subscribe to your own topic and enter it in Settings. You can also add an email address."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does it work outside the US?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Not yet. It uses US ZIP codes and US Apple Stores."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does it reserve or buy the phone?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. When you get an alert, order on apple.com and choose in-store pickup at that store. That reserves the phone for you."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Is this an Apple app?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. iPhone Stock is an independent tool and is not affiliated with Apple Inc. iPhone is a trademark of Apple Inc."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
+
 <style>
   :root {
     --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --muted: #6e6e73; --line: #e3e3e8;
@@ -113,6 +243,12 @@
   .msg.ok { color: var(--ok); } .msg.err { color: var(--err); }
   .locked { opacity: .5; pointer-events: none; }
   footer { color: var(--muted); font-size: 12.5px; margin-top: 24px; }
+  .seo { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .seo h2 { font-size: 17px; margin: 22px 0 8px; }
+  .seo p { color: var(--muted); max-width: 70ch; }
+  details.faq { border-bottom: 1px solid var(--line); padding: 10px 0; }
+  details.faq summary { cursor: pointer; font-weight: 600; }
+  details.faq p { margin: 8px 0 0; }
   footer a { color: var(--muted); }
   .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 12px; }
   table.cmp { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13px; }
@@ -138,8 +274,8 @@
 <main>
   <div class="top">
     <div>
-      <h1 class="brand"><img src="/logo.svg" alt="" width="34" height="34"><span data-i18n="title"></span></h1>
-      <p class="sub" id="sub"></p>
+      <h1 class="brand"><img src="/logo.svg" alt="" width="34" height="34"><span data-i18n="title">iPhone Stock Checker</span></h1>
+      <p class="sub" id="sub">Free alerts when the iPhone you want is ready for pickup at an Apple Store near you.</p>
     </div>
     <div class="topright">
       <div class="lang" role="group" aria-label="Language">
@@ -151,11 +287,11 @@
   </div>
 
   <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="stock" data-i18n="tabStock"></button>
-    <button role="tab" data-tab="compare" data-i18n="tabCompare"></button>
-    <button role="tab" data-tab="guide" data-i18n="tabGuide"></button>
-    <button role="tab" data-tab="settings" data-i18n="tabSettings"></button>
-    <button role="tab" data-tab="admin" data-i18n="tabAdmin" hidden></button>
+    <button role="tab" data-tab="stock" data-i18n="tabStock">Stock</button>
+    <button role="tab" data-tab="compare" data-i18n="tabCompare">Compare</button>
+    <button role="tab" data-tab="guide" data-i18n="tabGuide">Guide</button>
+    <button role="tab" data-tab="settings" data-i18n="tabSettings">Settings</button>
+    <button role="tab" data-tab="admin" data-i18n="tabAdmin" hidden>Admin</button>
   </nav>
 
   <div id="setup"></div>
@@ -163,112 +299,157 @@
   <!-- ===== STOCK ===== -->
   <section class="tab" id="tab-stock">
     <div class="bar">
-      <button id="live" data-i18n="checkNow"></button>
+      <button id="live" data-i18n="checkNow">Check now</button>
       <span class="status" id="status"></span>
     </div>
     <form class="locbar" id="locBar" onsubmit="return false">
-      <label class="f"><span data-i18n="zip"></span><input id="locZip" inputmode="numeric" maxlength="5" autocomplete="postal-code"></label>
-      <label class="f"><span data-i18n="maxMiles"></span><input id="locMiles" type="number" min="1" max="500" inputmode="numeric"></label>
-      <button id="locApply" data-i18n="locApply"></button>
+      <label class="f"><span data-i18n="zip">ZIP code</span><input id="locZip" inputmode="numeric" maxlength="5" autocomplete="postal-code"></label>
+      <label class="f"><span data-i18n="maxMiles">Max distance (miles)</span><input id="locMiles" type="number" min="1" max="500" inputmode="numeric"></label>
+      <button id="locApply" data-i18n="locApply">Show stores</button>
       <span class="msg" id="locMsg"></span>
     </form>
     <div id="anonHint"></div>
     <div id="banner"></div>
-    <h2 data-i18n="wantedTitle"></h2>
-    <div id="wanted"><div class="banner no" data-i18n="loading"></div></div>
-    <h2 data-i18n="othersTitle"></h2>
-    <div id="others"><div class="banner no" data-i18n="loading"></div></div>
+    <h2 data-i18n="wantedTitle">Phones I'm looking for</h2>
+    <div id="wanted"><div class="banner no" data-i18n="loading">Loading…</div></div>
+    <h2 data-i18n="othersTitle">Other phones in stock</h2>
+    <div id="others"><div class="banner no" data-i18n="loading">Loading…</div></div>
   </section>
 
   <!-- ===== COMPARE ===== -->
   <section class="tab" id="tab-compare" hidden>
-    <h2 data-i18n="cmpTitle" style="margin-top:8px"></h2>
+    <h2 data-i18n="cmpTitle" style="margin-top:8px">Compare models</h2>
     <div class="opts" id="cmpModels"></div>
-    <label class="switch" style="margin:12px 0"><input type="checkbox" id="cmpDiff"> <span data-i18n="cmpOnlyDiff"></span></label>
+    <label class="switch" style="margin:12px 0"><input type="checkbox" id="cmpDiff"> <span data-i18n="cmpOnlyDiff">Show only differences</span></label>
     <div id="cmpTable"></div>
   </section>
 
   <!-- ===== GUIDE ===== -->
   <section class="tab guide" id="tab-guide" hidden>
-    <div data-i18n-html="guideHtml"></div>
+    <div data-i18n-html="guideHtml"><h2>How it works</h2>
+<p>This app watches Apple Store <b>in-store pickup</b> availability for iPhones near a US ZIP code. Every 15 minutes it checks Apple's stock, and when a phone you're looking for becomes available it sends a push notification to your phone. Then you order it online on apple.com with pickup at that store — that reserves the phone for you.</p>
+
+<h2>1. Sign in</h2>
+<p>Open <b>Settings</b> and click <b>Sign in with Google</b>. Each account has its own phone, location and notifications. Without signing in you can still browse stock for the default search.</p>
+
+<h2>2. Choose your phone</h2>
+<ol>
+<li>In <b>Settings → Which phone I'm looking for</b>, select one or more models.</li>
+<li>Optionally select <b>Storage</b> and <b>Color</b>. Nothing selected means any.</li>
+<li>Enter the <b>ZIP code</b> where you'll pick it up and the <b>max distance</b> you're willing to drive.</li>
+</ol>
+
+<h2>3. Get notifications on your phone (ntfy)</h2>
+<ol>
+<li>Install the free <b>ntfy</b> app from the App Store or Google Play.</li>
+<li>Open it, tap <b>+</b>, type a topic name only you know (e.g. <code>john-iphone-7f3k9</code>) and tap <b>Subscribe</b>. Anyone who knows the topic name can read it, so make it hard to guess.</li>
+<li>Enter the same topic in <b>Settings → ntfy topic</b>, click <b>Save</b>, then <b>Send test notification</b>. It should arrive within seconds.</li>
+<li>Optional: add an <b>email</b> to also get alerts by email, set <b>Priority</b> (Urgent rings longer) and <b>Repeat reminder</b>.</li>
+</ol>
+
+<h2>4. When you get an alert</h2>
+<ul>
+<li>Open the notification — it lists the model, the store and the distance.</li>
+<li>Order on apple.com and choose <b>pickup</b> at that store. Stock changes quickly, so act fast.</li>
+<li>Walking in without an order is possible but not guaranteed — walk-ins are served after online orders.</li>
+</ul>
+
+<h2>Other tabs</h2>
+<ul>
+<li><b>Stock</b> — phones you're looking for (green = available) and all other iPhones currently in stock near you.</li>
+<li><b>Compare</b> — differences between iPhone 18 Pro Max, 18 Pro, Air, 17 and 17e, plus current stock for each.</li>
+</ul>
+
+<h2>Privacy</h2>
+<p>From Google we store only your name, email and profile picture. Your settings are stored to run your alerts. Visits are counted anonymously (a random ID in your browser, no IP addresses).</p>
+
+<h2>Owner setup (app owner only)</h2>
+<ol>
+<li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console → APIs &amp; Services → Credentials</a> (create a project if asked).</li>
+<li><b>OAuth consent screen</b>: choose <b>External</b>, fill in the app name and your email, save. Then <b>Publish app</b> so anyone can sign in.</li>
+<li><b>Create credentials → OAuth client ID</b> → type <b>Web application</b>.</li>
+<li>Under <b>Authorized JavaScript origins</b> add this page's address, e.g. <code>https://iphone-stock-checker-hazel.vercel.app</code>. No redirect URI is needed.</li>
+<li>Copy the <b>Client ID</b> (ends with <code>.apps.googleusercontent.com</code>) and paste it in the yellow setup box at the top of this page together with your PIN.</li>
+<li>Sign in with Google, open <b>Settings</b> and use <b>Become owner</b> with your PIN. The <b>Admin</b> tab with visitor stats appears.</li>
+</ol></div>
   </section>
 
   <!-- ===== SETTINGS ===== -->
   <section class="tab" id="tab-settings" hidden>
     <div id="signInPrompt" class="card" hidden>
-      <h3 data-i18n="signInTitle"></h3>
-      <p class="hint" data-i18n="signInText" style="margin:6px 0 12px"></p>
+      <h3 data-i18n="signInTitle">Sign in to set up your alerts</h3>
+      <p class="hint" data-i18n="signInText" style="margin:6px 0 12px">Each account has its own phone, location and notifications. We only store your name and email from Google.</p>
       <div class="gbtn" data-gbtn></div>
     </div>
 
     <form id="form" onsubmit="return false" hidden>
       <div class="card">
         <fieldset>
-          <legend data-i18n="whichPhone"></legend>
+          <legend data-i18n="whichPhone">Which phone I'm looking for</legend>
           <div class="opts" id="models"></div>
-          <p class="hint" data-i18n="whichPhoneHint"></p>
+          <p class="hint" data-i18n="whichPhoneHint">You get notified for these models. All others are shown under “Other phones in stock”.</p>
         </fieldset>
         <fieldset>
-          <legend data-i18n="storage"></legend>
+          <legend data-i18n="storage">Storage</legend>
           <div class="opts" id="storages"></div>
-          <p class="hint" data-i18n="anyHint"></p>
+          <p class="hint" data-i18n="anyHint">Nothing selected = any.</p>
         </fieldset>
         <fieldset style="margin-bottom:0">
-          <legend data-i18n="color"></legend>
+          <legend data-i18n="color">Color</legend>
           <div class="opts" id="colors"></div>
-          <p class="hint" data-i18n="anyHint"></p>
+          <p class="hint" data-i18n="anyHint">Nothing selected = any.</p>
         </fieldset>
       </div>
       <div class="card">
         <fieldset style="margin-bottom:0">
-          <legend data-i18n="location"></legend>
+          <legend data-i18n="location">Location</legend>
           <div class="row">
-            <label class="f"><span data-i18n="zip"></span><input id="zip" inputmode="numeric" maxlength="5"></label>
-            <label class="f"><span data-i18n="maxMiles"></span><input id="maxMiles" type="number" min="1" max="500"></label>
+            <label class="f"><span data-i18n="zip">ZIP code</span><input id="zip" inputmode="numeric" maxlength="5"></label>
+            <label class="f"><span data-i18n="maxMiles">Max distance (miles)</span><input id="maxMiles" type="number" min="1" max="500"></label>
           </div>
         </fieldset>
       </div>
       <div class="card">
         <fieldset style="margin-bottom:0">
-          <legend data-i18n="notifications"></legend>
-          <label class="switch"><input type="checkbox" id="enabled"> <span data-i18n="sendNotifications"></span></label>
+          <legend data-i18n="notifications">Notifications</legend>
+          <label class="switch"><input type="checkbox" id="enabled"> <span data-i18n="sendNotifications">Send notifications</span></label>
           <div class="row" style="margin-top:12px">
             <label class="f">ntfy topic<input id="ntfyTopic" autocomplete="off" spellcheck="false"></label>
-            <label class="f"><span data-i18n="emailOptional"></span><input id="email" type="email" autocomplete="email"></label>
-            <label class="f"><span data-i18n="priority"></span>
+            <label class="f"><span data-i18n="emailOptional">Email (optional)</span><input id="email" type="email" autocomplete="email"></label>
+            <label class="f"><span data-i18n="priority">Priority</span>
               <select id="priority">
-                <option value="min" data-i18n="prioMin"></option>
-                <option value="low" data-i18n="prioLow"></option>
-                <option value="default" data-i18n="prioDefault"></option>
-                <option value="high" data-i18n="prioHigh"></option>
-                <option value="urgent" data-i18n="prioUrgent"></option>
+                <option value="min" data-i18n="prioMin">Minimum (silent)</option>
+                <option value="low" data-i18n="prioLow">Low</option>
+                <option value="default" data-i18n="prioDefault">Normal</option>
+                <option value="high" data-i18n="prioHigh">High</option>
+                <option value="urgent" data-i18n="prioUrgent">Urgent (long ring)</option>
               </select>
             </label>
-            <label class="f"><span data-i18n="repeat"></span>
+            <label class="f"><span data-i18n="repeat">Repeat reminder</span>
               <select id="repeatHours">
-                <option value="0" data-i18n="rep0"></option>
-                <option value="1" data-i18n="rep1"></option>
-                <option value="3" data-i18n="rep3"></option>
-                <option value="6" data-i18n="rep6"></option>
-                <option value="12" data-i18n="rep12"></option>
+                <option value="0" data-i18n="rep0">Only when something new appears</option>
+                <option value="1" data-i18n="rep1">Every hour while in stock</option>
+                <option value="3" data-i18n="rep3">Every 3 hours</option>
+                <option value="6" data-i18n="rep6">Every 6 hours</option>
+                <option value="12" data-i18n="rep12">Every 12 hours</option>
               </select>
             </label>
           </div>
-          <p class="hint" data-i18n-html="ntfyHint"></p>
+          <p class="hint" data-i18n-html="ntfyHint">Install the <b>ntfy</b> app and subscribe to the same topic (see the Guide tab). Leave topic and email empty to keep the current values. Notifications are sent in the language selected at the top.</p>
         </fieldset>
       </div>
       <div class="actions">
-        <button id="save" data-i18n="save"></button>
-        <button id="test" class="ghost" data-i18n="sendTest"></button>
+        <button id="save" data-i18n="save">Save</button>
+        <button id="test" class="ghost" data-i18n="sendTest">Send test notification</button>
         <span class="msg" id="saveMsg"></span>
       </div>
     </form>
 
     <div id="claimBox" class="card" hidden style="margin-top:16px">
-      <h3 data-i18n="claimTitle"></h3>
-      <p class="hint" data-i18n="claimText" style="margin:6px 0 10px"></p>
-      <div class="row"><label class="f"><span data-i18n="pinLabel"></span><input id="claimPin" type="password" autocomplete="current-password"></label></div>
-      <div class="actions"><button id="claim" data-i18n="claimBtn"></button><span class="msg" id="claimMsg"></span></div>
+      <h3 data-i18n="claimTitle">Are you the owner of this app?</h3>
+      <p class="hint" data-i18n="claimText" style="margin:6px 0 10px">Enter the PIN you set earlier. Your account becomes the owner: you'll see the Admin tab with visitor stats, and your previous settings move to your account.</p>
+      <div class="row"><label class="f"><span data-i18n="pinLabel">PIN</span><input id="claimPin" type="password" autocomplete="current-password"></label></div>
+      <div class="actions"><button id="claim" data-i18n="claimBtn">Become owner</button><span class="msg" id="claimMsg"></span></div>
     </div>
   </section>
 
@@ -276,42 +457,44 @@
   <section class="tab" id="tab-admin" hidden>
     <div class="kpis" id="kpis"></div>
     <div class="card">
-      <h3 data-i18n="cronTitle"></h3>
+      <h3 data-i18n="cronTitle">Automatic checks</h3>
       <div id="cronStatus" class="meta" style="margin:6px 0 10px"></div>
-      <div class="actions" style="margin-top:0"><button id="runNow" data-i18n="runNow"></button><span class="msg" id="runMsg"></span></div>
-      <p class="hint" data-i18n-html="cronHelp" style="margin-top:14px"></p>
+      <div class="actions" style="margin-top:0"><button id="runNow" data-i18n="runNow">Run check now</button><span class="msg" id="runMsg"></span></div>
+      <p class="hint" data-i18n-html="cronHelp" style="margin-top:14px">Stock is checked by calling the URL below every 15 minutes. GitHub Actions is a backup but its schedule is unreliable, so set up a free scheduler: go to <a href="https://cron-job.org" target="_blank" rel="noopener">cron-job.org</a>, create a free account, click <b>Create cronjob</b>, paste the URL, choose <b>Every 5 minutes</b> and save. Keep this URL private.</p>
       <div class="row" style="margin-top:8px"><label class="f">Cron URL<input id="cronUrl" readonly spellcheck="false"></label></div>
-      <div class="actions"><button id="copyCron" class="ghost" data-i18n="copy"></button></div>
+      <div class="actions"><button id="copyCron" class="ghost" data-i18n="copy">Copy URL</button></div>
     </div>
     <div class="card">
-      <h3 data-i18n="alertsTitle"></h3>
+      <h3 data-i18n="alertsTitle">Sent notifications</h3>
       <div id="alertsTable" style="margin-top:10px"></div>
     </div>
     <div class="card">
-      <h3 data-i18n="adminDaily"></h3>
+      <h3 data-i18n="adminDaily">Last 30 days</h3>
       <div class="chart" id="chart"></div>
-      <div class="legend"><span class="sw views"></span><span data-i18n="views"></span><span class="sw visitors"></span><span data-i18n="visitors"></span></div>
+      <div class="legend"><span class="sw views"></span><span data-i18n="views">Page views</span><span class="sw visitors"></span><span data-i18n="visitors">Unique visitors</span></div>
     </div>
     <div class="card">
-      <h3 data-i18n="adminUsers"></h3>
+      <h3 data-i18n="adminUsers">Registered users</h3>
       <div id="usersTable" style="margin-top:10px"></div>
     </div>
     <div class="card">
       <h3>Google Client ID</h3>
-      <p class="hint" data-i18n="clientIdHint" style="margin:6px 0 10px"></p>
+      <p class="hint" data-i18n="clientIdHint" style="margin:6px 0 10px">From Google Cloud Console → Credentials. Change it only if you create a new OAuth client.</p>
       <div class="row"><label class="f">Client ID<input id="adminClientId" spellcheck="false"></label></div>
-      <div class="actions"><button id="saveClientId" data-i18n="save"></button><span class="msg" id="adminMsg"></span></div>
+      <div class="actions"><button id="saveClientId" data-i18n="save">Save</button><span class="msg" id="adminMsg"></span></div>
     </div>
   </section>
 
-  <footer><span data-i18n="footer"></span><br><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></footer>
+  <section class="seo" data-i18n-html="seoHtml"><h2>How iPhone Stock works</h2><p>Pick the iPhone you want, your US ZIP code and how far you'll drive. iPhone Stock watches Apple Store pickup availability for every storage size and color and alerts you as soon as one is ready for pickup near you. You can also compare iPhone 18 Pro Max, 18 Pro, Air, 17 and 17e side by side.</p><h2>FAQ</h2><details class="faq"><summary>What does iPhone Stock do?</summary><p>It checks Apple Store in-store pickup availability for the iPhone you want near your US ZIP code and sends you a push notification (or email) the moment it shows up, so you don't have to keep refreshing apple.com.</p></details><details class="faq"><summary>Which iPhones can I track?</summary><p>iPhone 18 Pro Max, iPhone 18 Pro, iPhone Air, iPhone 17 and iPhone 17e — every storage size and color Apple sells for pickup.</p></details><details class="faq"><summary>Is it free?</summary><p>Yes. It is free, has no ads and you only need a Google account to save your alerts.</p></details><details class="faq"><summary>How often is stock checked?</summary><p>Every few minutes, around the clock. You can also press “Check now” for an instant check.</p></details><details class="faq"><summary>How do I get notified?</summary><p>Install the free ntfy app, subscribe to your own topic and enter it in Settings. You can also add an email address.</p></details><details class="faq"><summary>Does it work outside the US?</summary><p>Not yet. It uses US ZIP codes and US Apple Stores.</p></details><details class="faq"><summary>Does it reserve or buy the phone?</summary><p>No. When you get an alert, order on apple.com and choose in-store pickup at that store. That reserves the phone for you.</p></details><details class="faq"><summary>Is this an Apple app?</summary><p>No. iPhone Stock is an independent tool and is not affiliated with Apple Inc. iPhone is a trademark of Apple Inc.</p></details></section>
+  <footer><span data-i18n="footer">Stock is checked automatically every few minutes. “Check now” runs a check immediately. Not affiliated with Apple.</span><br><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></footer>
 </main>
 <script>
+const SEO_TITLE = document.title;
 const I18N = {
   en: {
-    title: "iPhone Stock",
+    title: "iPhone Stock Checker",
     sub: (miles, zip) => `Apple Store pickup within ${miles} miles of ZIP ${zip}.`,
-    subDefault: "Apple Store pickup availability.",
+    subDefault: "Free alerts when the iPhone you want is ready for pickup at an Apple Store near you.",
     tabStock: "Stock", tabCompare: "Compare", tabGuide: "Guide", tabSettings: "Settings", tabAdmin: "Admin",
     signIn: "Sign in", signOut: "Sign out", owner: "owner",
     checkNow: "Check now", checking: "Checking…", loading: "Loading…",
@@ -330,7 +513,8 @@ const I18N = {
     rep3: "Every 3 hours", rep6: "Every 6 hours", rep12: "Every 12 hours",
     ntfyHint: "Install the <b>ntfy</b> app and subscribe to the same topic (see the Guide tab). Leave topic and email empty to keep the current values. Notifications are sent in the language selected at the top.",
     save: "Save", sendTest: "Send test notification",
-    footer: "Stock is checked automatically every 15 minutes. “Check now” runs a check immediately. Not affiliated with Apple.",
+    footer: "Stock is checked automatically every few minutes. “Check now” runs a check immediately. Not affiliated with Apple.",
+    seoHtml: `<h2>How iPhone Stock works</h2><p>Pick the iPhone you want, your US ZIP code and how far you'll drive. iPhone Stock watches Apple Store pickup availability for every storage size and color and alerts you as soon as one is ready for pickup near you. You can also compare iPhone 18 Pro Max, 18 Pro, Air, 17 and 17e side by side.</p><h2>FAQ</h2><details class="faq"><summary>What does iPhone Stock do?</summary><p>It checks Apple Store in-store pickup availability for the iPhone you want near your US ZIP code and sends you a push notification (or email) the moment it shows up, so you don't have to keep refreshing apple.com.</p></details><details class="faq"><summary>Which iPhones can I track?</summary><p>iPhone 18 Pro Max, iPhone 18 Pro, iPhone Air, iPhone 17 and iPhone 17e — every storage size and color Apple sells for pickup.</p></details><details class="faq"><summary>Is it free?</summary><p>Yes. It is free, has no ads and you only need a Google account to save your alerts.</p></details><details class="faq"><summary>How often is stock checked?</summary><p>Every few minutes, around the clock. You can also press “Check now” for an instant check.</p></details><details class="faq"><summary>How do I get notified?</summary><p>Install the free ntfy app, subscribe to your own topic and enter it in Settings. You can also add an email address.</p></details><details class="faq"><summary>Does it work outside the US?</summary><p>Not yet. It uses US ZIP codes and US Apple Stores.</p></details><details class="faq"><summary>Does it reserve or buy the phone?</summary><p>No. When you get an alert, order on apple.com and choose in-store pickup at that store. That reserves the phone for you.</p></details><details class="faq"><summary>Is this an Apple app?</summary><p>No. iPhone Stock is an independent tool and is not affiliated with Apple Inc. iPhone is a trademark of Apple Inc.</p></details>`,
     notSet: "not set", justNow: "just now",
     minAgo: (m) => `${m} min ago`, hAgo: (h, m) => `${h} h ${m} min ago`,
     lastAuto: "Last automatic check", lastLive: "Last live check",
@@ -436,7 +620,7 @@ const I18N = {
   bs: {
     title: "iPhone zalihe",
     sub: (miles, zip) => `Apple Store preuzimanje do ${miles} milja od ZIP ${zip}.`,
-    subDefault: "Dostupnost iPhonea za preuzimanje u Apple Storeu.",
+    subDefault: "Besplatne obavijesti kad je iPhone koji želiš spreman za preuzimanje u Apple Storeu u blizini.",
     tabStock: "Stanje", tabCompare: "Poređenje", tabGuide: "Uputstva", tabSettings: "Podešavanja", tabAdmin: "Admin",
     signIn: "Prijava", signOut: "Odjava", owner: "vlasnik",
     checkNow: "Provjeri sada", checking: "Provjeravam…", loading: "Učitavam…",
@@ -455,7 +639,8 @@ const I18N = {
     rep3: "Svaka 3 sata", rep6: "Svakih 6 sati", rep12: "Svakih 12 sati",
     ntfyHint: "Instaliraj aplikaciju <b>ntfy</b> i pretplati se na isti topic (vidi tab Uputstva). Polja za topic i email ostavi prazna da zadržiš postojeće vrijednosti. Obavijesti stižu na jeziku izabranom gore.",
     save: "Sačuvaj", sendTest: "Pošalji probnu poruku",
-    footer: "Zalihe se provjeravaju automatski svakih 15 minuta. „Provjeri sada“ radi provjeru odmah. Nije povezano s Appleom.",
+    footer: "Zalihe se provjeravaju automatski svakih nekoliko minuta. „Provjeri sada“ radi provjeru odmah. Nije povezano s Appleom.",
+    seoHtml: `<h2>Kako radi iPhone Stock</h2><p>Izaberi iPhone koji želiš, američki ZIP kod i koliko daleko si spreman voziti. iPhone Stock prati dostupnost za preuzimanje u Apple Storeovima za svaku memoriju i boju i javlja ti čim je neki model spreman za preuzimanje u blizini. Možeš i uporediti iPhone 18 Pro Max, 18 Pro, Air, 17 i 17e.</p><h2>Česta pitanja</h2><details class="faq"><summary>Šta radi iPhone Stock?</summary><p>Provjerava da li Apple Store u blizini tvog američkog ZIP koda ima željeni iPhone za preuzimanje u dućanu i šalje ti push obavijest (ili email) čim se pojavi, pa ne moraš stalno osvježavati apple.com.</p></details><details class="faq"><summary>Koje iPhone modele mogu pratiti?</summary><p>iPhone 18 Pro Max, iPhone 18 Pro, iPhone Air, iPhone 17 i iPhone 17e — sve memorije i boje koje Apple nudi za preuzimanje.</p></details><details class="faq"><summary>Da li je besplatno?</summary><p>Da. Besplatno je, bez reklama, a za čuvanje obavijesti treba ti samo Google nalog.</p></details><details class="faq"><summary>Koliko često se provjerava?</summary><p>Svakih nekoliko minuta, danonoćno. Možeš i kliknuti „Provjeri sada“ za trenutnu provjeru.</p></details><details class="faq"><summary>Kako dobijam obavijesti?</summary><p>Instaliraj besplatnu aplikaciju ntfy, pretplati se na svoj topic i upiši ga u Podešavanja. Možeš dodati i email.</p></details><details class="faq"><summary>Radi li van SAD-a?</summary><p>Još ne. Koristi američke ZIP kodove i Apple Storeove u SAD-u.</p></details><details class="faq"><summary>Rezerviše li ili kupuje telefon?</summary><p>Ne. Kad stigne obavijest, naruči na apple.com i izaberi preuzimanje u tom dućanu. Tako je telefon rezervisan za tebe.</p></details><details class="faq"><summary>Je li ovo Appleova aplikacija?</summary><p>Ne. iPhone Stock je nezavisan alat i nije povezan s kompanijom Apple Inc. iPhone je zaštitni znak kompanije Apple Inc.</p></details>`,
     notSet: "nije postavljen", justNow: "upravo",
     minAgo: (m) => `prije ${m} min`, hAgo: (h, m) => `prije ${h} h ${m} min`,
     lastAuto: "Zadnja automatska provjera", lastLive: "Zadnja provjera uživo",
@@ -619,7 +804,7 @@ async function api(path, method = "GET", body) {
 // ---------- language
 function applyLang() {
   document.documentElement.lang = lang;
-  document.title = T().title;
+  document.title = lang === "en" ? SEO_TITLE : `${T().title} – Apple Store pickup obavijesti`;
   document.querySelectorAll("[data-i18n]").forEach((el) => { const v = T()[el.dataset.i18n]; if (typeof v === "string") el.textContent = v; });
   document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = T()[el.dataset.i18nHtml]; });
   document.querySelectorAll("[data-lang]").forEach((b) => b.classList.toggle("on", b.dataset.lang === lang));
