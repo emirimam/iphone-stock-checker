@@ -157,7 +157,7 @@ def page(m, others):
   </div>
 </div>
 
-<h2>How to get a {e(m['name'])} for pickup</h2>
+<h2>How to get an {e(m["name"])} for pickup</h2>
 <ol>
   <li>Open <a href="/">iPhone Stock</a>, enter your US ZIP code and how far you'd drive.</li>
   <li>Sign in with Google and choose {e(m['name'])}, plus storage and color if you care.</li>
@@ -165,7 +165,7 @@ def page(m, others):
   <li>Order on apple.com and select in-store pickup at that store.</li>
 </ol>
 
-<h2>Tips for finding a {e(m['name'])}</h2>
+<h2>Tips for finding an {e(m["name"])}</h2>
 <ul>{tips}</ul>
 
 <h2>{e(m['name'])} prices and configurations (US)</h2>
