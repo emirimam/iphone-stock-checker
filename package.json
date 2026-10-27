@@ -10,5 +10,8 @@
   "scripts": {
     "check": "node scripts/notify.mjs",
     "test-notify": "node scripts/notify.mjs --test"
+  },
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
   }
 }
